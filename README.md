@@ -1,2 +1,2 @@
 # Teumer
-Miscellenous Files for GIT Testing
+Miscellanous Files for GIT Testing

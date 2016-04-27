@@ -41,6 +41,8 @@ def console_binary(command_to_run):
     Function to execute an OS command and return the stdout text.
     Convert b'binary to str
     :param command_to_run: run this command in the OS
+    :return: command output
+    :rtype: console_text as str
     """
     osstdout = subprocess.Popen(command_to_run,
                                 shell=True,
@@ -58,6 +60,8 @@ def console_binary_return_code(command_to_run):
     """
     Function to execute an OS command and return the stdout text and the return code of the command run.
     :param command_to_run: run this command in the OS
+    :return: return command output
+    :rtype: console_text as str, returncode as int
     """
     osstdout = subprocess.Popen(command_to_run,
                                 shell=True,
@@ -72,7 +76,6 @@ def console_binary_return_code(command_to_run):
 
 def clear_terminal():
     """
-
-    :return:
+    Function to clear the terminal
     """
     os.system('clear')

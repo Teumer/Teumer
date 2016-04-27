@@ -34,6 +34,7 @@ def console_output(notice_type, message):
         output_text = "[ " + "\033[0m" + "????" + "\033[0m" + " ] "
 
     print("{0}{1}".format(output_text, message))
+    sys.stdout.flush()
 
 
 def console_binary(command_to_run):
@@ -60,7 +61,7 @@ def console_binary_return_code(command_to_run):
     """
     Function to execute an OS command and return the stdout text and the return code of the command run.
     :param command_to_run: run this command in the OS
-    :return: return command output
+    :return: return command output and the return code of command
     :rtype: console_text as str, returncode as int
     """
     osstdout = subprocess.Popen(command_to_run,
@@ -71,6 +72,28 @@ def console_binary_return_code(command_to_run):
                                 close_fds=True)
     console_text = osstdout.communicate()[0]
     console_text = bytes(console_text).decode().strip()
+    return console_text, osstdout.returncode
+
+
+def console_real_time(command_to_run):
+    """
+    Function to execute an OS command and print output in real time and return the stdout text and the return code of
+    the command run
+    :param command_to_run: command to run
+    :return: stdout and exit code
+    """
+    osstdout = subprocess.Popen(command_to_run,
+                                shell=True,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE)
+
+    while osstdout.poll() is None:
+        out = osstdout.stdout.read(1)
+        sys.stdout.write(bytes(out).decode())
+        sys.stdout.flush()
+
+    console_text = osstdout.communicate()[0]
+    console_text = str(console_text).strip()
     return console_text, osstdout.returncode
 
 

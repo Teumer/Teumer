@@ -1,5 +1,11 @@
 import os
 import sys
-from time import sleep
 
-sleep(10)
+
+def console_binary(command):
+    """
+
+    :param command:
+    :return:
+    """
+    pass

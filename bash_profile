@@ -20,13 +20,31 @@ function prompt {
   local WHITEBOLD="\[\033[1;37m\]"
   local RESETCOLOR="\[\e[00m\]"
 
-  #export PS1="\[\e[31;0m\]\h:\w \u\\$ \[\e[0m\]"
-  export PS1="$RED\u$WHITE@$RED\h:$PURPLE\w  \n→ $RESETCOLOR"
+  #export PS1="$RED\u$WHITE@$RED\h:$PURPLE\w  \n→ $RESETCOLOR"
+  export PS1="$PURPLEBOLD\h:$PURPLEBOLD\w  \n→ $RESETCOLOR"
   export PS2="| → $RESETCOLOR"
 }
 
 prompt
 
-# ALIAS
-alias ls='ls -lh'
-alias clearssh='echo "" > ~/.ssh/known_hosts'
+###################
+#     ALIAS       #
+###################
+alias ls='ls -lhF'
+alias emptytrash='rm -rf ~/.Trash/*'
+
+alias coffee='caffeinate -d &'
+alias decaf='killall caffeinate'
+
+# This file
+alias ss='source ~/.bash_profile'
+alias bp='vi ~/.bash_profile'
+
+# VPN
+alias vpnup='sudo wg-quick up royal-claw'
+alias vpninfo='sudo wg show'
+alias vpndown='sudo wg-quick down royal-claw'
+
+# External IP
+alias myip4='curl -4 icanhazip.com'
+alias myip6='curl -6 icanhazip.com'

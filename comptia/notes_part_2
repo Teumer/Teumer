@@ -1,0 +1,2516 @@
+LX0-104
+
+Install and Configure X11
+X Window System (x for short) : Linux main GUI
+
+Configuring Basic X Features
+- mouse used
+- keyboard layout
+- screen resolution
+- video refresh rate
+- display color depth
+- video card
+
+X Server Options for Linux
+
+XFree86
+- dominant X server until 2004
+- open source
+
+X.org-X11
+- In 2004 most Linux distros shifted from XFree86 to X.org-X11 because of licensing changes
+- Virtually identical to XFree86
+- Difference: name of the configuration file and default location for fonts
+
+Accelerated-X
+- commercial accelerated X server from Xi graphics
+- driver base is independent from more popular open source choices
+
+Using Manufacturer Provided Video Drivers
+- 1 main function of X is to provide drivers that control the video card
+- installing manufacturer provided drivers
+    - extracting files from a tarball and running an installation script
+- these drivers are often proprietary
+- AMD and nVidia drivers also include Linux kernel drivers as a necessary component
+    - need to reinstall drivers if you upgrade your kernel
+
+Methods of Configuring X
+- X configuration file contains numerous arcane options
+- use a configuration utility instead for most settings
+
+X Configuration Utilities
+- run as root
+- run when no execution server is running
+
+XFree86
+- XFree86 -configure
+- /root/XF86Config.new
+
+X.org-X11
+- Xorg -configure
+- /root/xorg.conf.new
+
+Distribution Specific Tools
+- Red Hat / Fedora Display Settings tool (system-config-display in an xterm)
+- SUSE's YaST and YaST2
+- xf86cfg or xorgcfg
+    - deprecated!
+
+X Configuration File Format
+
+X.org-X11
+- /etc/X11/xorg.conf
+- Many modern X.org-X11 configurations omit the X configuration file entirely
+    - rely on runtime auto-detection of hardware instead
+
+XFree86 4.x
+/etc/X11 or /etc XF86Config-4 or XF86Config
+
+XFree86 3.3.6 and earlier
+- /etc/X11 or /etc/
+- XF86Config
+
+X Configure and Test Cycle
+- X must not be running for configuration
+- X is usually started automatically
+- Red Hat / Fedora use `telinit 3`
+- Debian / Ubuntu / Gentoo do not use runlevels as a signal to start X
+    - /etc/init.d/xdm stop
+    - systemctl stop lightdm
+    - xdm, gdm, kdm, mdm, or lightdm instead
+
+- if configuration tests successfully start X server again
+- `startx` to start the X server
+- Red Hat / Fedora use `telinit 5`
+- Debian / Ubuntu / Gentoo
+    - /etc/init.d/xdm startdm
+    - systemctl start lightdm
+
+- another approach: leave the system in its X enabled runlevel and then kill the X server
+    - CTRL + ALT + BACKSPACE does this on my systems
+    - Alternatively use `kill $pid`
+
+X Configuration Options
+- Module
+- InputDevice (1x for keyboard, 1x for mouse)
+- Monitor
+- Device
+- Screen
+- ServerLayout
+
+Loading Modules
+Section "Module"
+    Load "dbe"
+    Load "extmod"
+    Load "fbdevhw"
+    Load "glx"
+    Load "record"
+    Load "freetype"
+    Load "typel"
+    Load "dri"
+EndSection
+
+freetype / type1 : handle TrueType and Adobe Type 1 font rendering
+
+
+Setting the Keyboard
+
+Section "InputDevice"
+    Identifier  "Keyboard0"
+    Driver      "kbd"
+    Option      "XkbModel" "pc105"
+    Option      "XkbLayout" "us"
+    Option      "AutoRepeat" "500 200"
+EndSection
+
+Identifier: provides a label that's used by another section ServerLayout, name is arbitrary
+
+Driver: tells X what driver to use to access the keyboard
+    - kbd, Keyboard, evdev depending on the X server
+    - evdev: generic input device driver that works with many types of input devices
+
+Option: set various options that adjust keyboard features
+    - model
+    - layout
+    - repeat rate (2x #s)
+        - time until the 1st repeat and time between subsequent repeats (expressed in milliseconds (ms))
+
+Setting the Mouse
+
+Section "InputDevice"
+    Identifier  "Mouse0"
+    Driver      "mouse"
+    Option      "Protocol" "IMPS/2"
+    Option      "Device" "/dev/input/mice"
+    Option      "Emulate3Buttons" "no"
+    Option      "ZAxisMapping" "4 5"
+EndSection
+
+Device: tells X what Linux device file to read to access the mouse
+    - /dev/input/mice
+    - /dev/mouse
+    - /dev/input/mouse1 (bluetooth)
+    - /dev/usb/usbmouse (old identifier)
+    - /dev/ttyS0 (1st RS-232 serial port mouse)
+    - /dev/ttyS1 (2nd RS-232 serial port mouse)
+
+Protocol: tells X what signals to expect from the mouse for various movements and button presses
+- Auto: protocol that causes X to guess the mouse's protocol - usually works correctly
+- IMPS/2 / ExplorerPS/2 : more specific protocols
+    - Many USB mice use the PS/2 mouse protocol even though a physical PS/2 mouse port is not used
+
+Emulate3Buttons: treat a chord (a simultaneous press) of both buttons on a 2 button mouse as a middle button press
+- usually disabled for 3 button mice and scroll mice (scroll wheel button doubles as middle click)
+
+ZAxisMapping: maps the scroll wheel actions to the 4th and 5th buttons
+- X must treat scroll wheels as if they were buttons
+- scrolling up or down are button presses
+
+
+Setting the Monitor
+
+Section "Monitor"
+    Identifier  "Monitor0"
+    ModelName   "AOC e2343FK"
+    HorizSync   30.0 - 83.0
+    VertRefresh 55.0 - 75.0
+    # My custom 1920x1080 mode
+    Modeline "1920x1080" 138.50 1920 1968 2000 2080 1080 1083 1088 1111
+EndSection
+
+HorizSync / VertRefresh: range of horizontal and vertical refresh rates that the monitor can accept
+- kilohertz (kHz)
+- hertz (Hz)
+- together these values determine the monitor's maximum resolution and refresh rate
+
+Modeline: to settle a resolution X looks through a series of mode lines
+- tricky, do not recommend setting manually
+
+Some mode lines represent video modes that are outside the horizontal or vertical sync ranges of a monitor
+- X can compute these cases and discard video modes that a monitor can't support
+- X searches all mode lines a monitor can handle and uses the mode line w/ the highest refresh @ a resolution
+- often mode lines are not present due to DDC
+
+Data Display Channel (DDC)
+- protocol enables monitors to communicate their maximum horizontal and vertical refresh rates
+
+Setting the video Card
+- X sends data only indirectly, through the video card
+
+Choosing the Driver
+- X can pick the optimum video driver automatically
+Driver "nv"
+
+Drivers reside in and end with "*_drv.o" example "nv_drv.o" is the nv driver
+- /usr/X11R6/lib/modules/drivers/
+- /usr/lib/xorg/modules/drivers/
+- /usr/lib64/xorg/modules/drivers/
+
+Some X configuration utils provide a large list of chipsets / specific video card models
+- you can select the chipset or board from this list
+
+Xorge -configure
+    - resulting file will likely include multiple Device sections
+    - "fdev" "vesa" are generic drivers that work, however, not optimally on a wide variety of video cards
+    - "nv" "nouveau" "radeon" "intel" most likely to use instead
+
+Setting Card Specific Options
+
+Section "Device"
+    Identifier      "Videocard0"
+    Driver          "nv"
+    VendorName      "nVidia"
+    BoardName       "GTX 1080Ti"
+    VideoRam        131072
+EndSection
+
+VideoRam: unnecessary w/ most boards because the driver can detect the amount of RAM in the card
+
+Setting the Resolution and Color Depth
+
+Section "Screen"
+    Identifier      "Screen 0"
+    Device          "Monitor0"
+    DefaultDepth    24
+    SubSection      "Display"
+        Depth       24
+        Modes       "1920x1080" "1280x1024" "1024x768"
+    EndSubSection
+    SubSection      "Display"
+        Depth       8
+        Modes       "1280x768" "800x600" "640x480"
+    EndSubSection
+EndSection
+
+DefaultDepth: choose between subsections
+
+Total amount of RAM:
+R = xres * yres * bpp / 8,388,608
+R: RAM in megabytes
+xres: x resolution in pixels
+yres: y resolution in pixels
+bpp: bit depth
+
+R = 1280 x 1024 x 24 / 8,388,608 = 3.7BM
+
+All modern cards have at least 32MB of RAM
+
+
+Putting it All Together
+
+ServerLayout: this section links together all of the other components of the X configuration
+
+Section "ServerLayout"
+    Identifier      "single head configuration"
+    Screen          "Screen0" 0 0
+    InputDevice     "Mouse0" "CorePointer"
+    InputDevice     "Keyboard0" "CoreKeyboard"
+EndSection
+
+
+Obtaining X Display Information
+
+xdpyinfo
+- X version number
+- resolution and color depth of all the current displays
+- much more
+
+xdpyinfo -ext extension
+extension : software module that provided extended capabilities to X
+- provides even more technical information
+
+xwinfo: detailed technical information about a specific window
+- execute, move the mouse cursor to a window, and click
+
+Alternate Window Selection Methods
+-id and -name options enables you to identify a window by an ID number or name (displayed in win border)
+-root selects the root window (the entire display)
+
+Window Relationships
+- windows have parents and children
+-children : option to identify relationships
+-tree : option that works recursively
+
+Basic Information
+-stats: option used by default
+-bits: limits output to window's bit states
+
+Additional Information
+-events: option produces information on the events that the window processes
+-size: displays information on sizing hints
+-wm: window manager data
+-shape: like stats but adds info on the window and border shapes
+-frame: window manager's frame
+-metric: adds measures in millimeters (mm) to the regular pixel based measures
+-english: measures in feet and inches
+-all: all available information
+
+Wayland
+Entirely new method of managing displays
+Wayland native apps do not use X at all
+
+Configuring X Fonts
+X's core font system can be setup from the X configuration file
+Alternatively, a font server - a program that delivers fonts to one or many compputers using network protocols
+
+Font Technologies and Formats
+
+Bitmap Fonts
+- simplest type
+- pixels in an array are either active or inactive
+- good for low power computers
+- issue is that each font must be optimized for display at a particular resolution
+- must have dozens of files for each resolution and font size
+
+Outline Fonts
+- scalable fonts
+- represents each character as a series of lines and curves in a high resolution matrix
+- single font file can handle every possible use of the font
+- issue is that this scaling operation is imperfect; look slightly worse than bitmap particularly at small sizes
+- also takes more cpu time (not much of an issue for modern CPUs)
+
+
+Outline 2 main formats
+- Adobe PostScript Type 1 (Type 1 for short)
+- TrueType developed by Microsoft and Apple
+
+
+Configuring X Core Fonts
+x core fonts: handled directly by X
+1) prepare a font directory to hold the fonts
+2) add font dir to X's font path
+
+Preparing a Font Directory
+Copy to:
+/usr/X11R6/lib/X11/fonts (xFree86)
+/usr/share/fonts
+/usr/share/X11/fonts
+/opt/fonts
+/usr/local/fonts
+
+Type 1 fonts: Linux needs font files w/ names that end in .pfa or .pfb
+TrueType : come as TTF files
+
+Prepare a Summary File
+fonts.dir
+- begins with a line that specifies the number of fonts that are described
+- subsequent lines provide a font filename and an X logical font description (XLFD)
+    - long description of the font
+
+example fonts.dir
+courb.pfa -ibm-Courier-bold-r-normal--0-0-0-0-m-0-iso8859-1
+
+MKFONTSCALE
+- reads all of the fonts in the current directory and creates a fonts.scale file (like a fonts.dir file)
+- describes only outline fonts
+- preferable as it handles both TrueType and Type 1 fonts
+
+MKFONTDIR
+- combines the fonts.cale file and with fonts.dir file, creating it if it doesn't already exist
+
+Other programs:
+
+TTMKFDIR
+- creates a fonts.dir file that describes TrueType fonts
+
+TYPELINST
+- creates a fonts.dir file that describes Type 1 fonts
+
+
+Adding Fonts to X's Font Path
+
+Edit the Files section of XF86Config or xorge.conf file
+
+Section "Files"
+    FontPath "/ usr/ share/ fonts/ 100dpi:unscaled"
+    FontPath "/ usr/ share/ fonts/ Type1"
+    FontPath "/ usr/ share/ fonts/ truetype"
+    FontPath "/ usr/ share/ fonts/ URW"
+    FontPath "/ usr/ share/ fonts/ Speedo"
+    FontPath "/ usr/ share/ fonts/ 100dpi"
+EndSection
+
+X tries each directory in turn
+    - if 2 dir contain fonts w/ the same name the 1st dir takes precedence
+
+:unscaled string in the 1st entry:
+- tells X to use bitmap fonts from this directory only if they match the requested font size
+- without string X will attempt to scale bitmap fonts from a front dir (w/ poor results)
+
+Bitmap dir are usually listed twice
+- once near the top of the font path w/ :unscaled string
+- once near the bottom of the list w/o it
+
+Add the font path to a running system by using xset
+
+XSET
+# Adds dir to the end of the font path
+xset fd+ /your/font/directory
+
+# Adds dir to the start of the font path
+xset +fd /your/font/directory
+
+# Tell X to re-examine all of the font dir to rebuild the list of available fonts
+xset fp rehash
+
+XFONTSEL
+point and click selection of X11 font names
+
+select an X core font for display for testing
+
+
+Configuring a Font Server
+
+- handy way to deliver fonts to many computers from a central location
+
+Section "Files"
+    FontPath    "unix:/7100"
+    FontPath    "tcp/font.pangea.edu:7100"
+EndSection
+
+1) 1st line specifies a local font server
+2) 2nd line specifies a remote font server
+
+Modify font server configuration file
+/etc/X11/fs/config
+
+catalogue = /usr/share/fonts/100dpi:unscaled,
+            /usr/share/fonts/Type1,
+            /usr/share/fonts/truetype,
+            /usr/share/fonts/URW,
+            /usr/share/fonts/Speedo,
+            /usr/share/fonts/100dpi
+
+Restart font server
+SysV Startup scripts or systemctl
+/etc/init.d/xfs restart
+
+
+X core fonts (including fonts delivered via a font server) have several drawbacks
+- aren't easy to integrate between the screen display and printed output
+    - difference from the point of view of word processing and printed output
+- server based
+    - unable to access the font files directly
+- limited to no support for kerning and other advanced features
+- do not support font smoothing (aka anti aliasing)
+    - employs grey pixels instead of black/white pixels along curves to create the illuision of
+        greater resolution than the display can produce
+
+
+Configuring Xft Fonts
+
+- based in part on the FreeType library
+    - open source library for rendering TrueType and Type 1 fonts
+- client based system
+- supports font smoothing
+- shares the same font dir
+
+/etc/fonts/local.conf
+
+<dir>/font/directory/</dir>
+
+- duplicate a line and add the new font
+
+FC-CACHE
+- build font information cache files
+- run as root
+- similar to the fonts.dir but the details differ
+
+
+Managing GUI Logins
+
+The X GUI Login System
+
+X Display Manager Control Protocol (XDMCP)
+
+Remote Login
+- an XDMCP server runs on a computer and listens for connections from remote computer's X servers
+
+Local Login
+- an XDMCP server runs on a computer and starts the local computer's X server
+
+XDMCP server manages the local X server's display - a login prompt
+
+XDMCP Servers
+1. X Display Manager (XDM)
+2. KDE Display Manager (KDM)
+3. GNOME Display Manager (GDM)
+4. Light Display Manager (LightDM)
+5. MDM Display Manager (MDM)
+
+Running an XDMCP Server
+- launch from init via an entry in /etc/inittab
+- usually started from runlevel 5 (not 3)
+
+A few distros (Gentoo, Debian, Ubuntu, etc.) attempt to start an XDMCP server in all runlevels
+- via a SysV startup script called xdm, kdm, gdm
+- can temporarily start/stop XDMCP server by passing the start or stop option
+
+Selection via Configuration File
+/etc/sysconfig/
+
+Fedora
+/etc/sysconfig/desktop sets the DISPLAYMANAGER variable to the path to the executable
+DISPLAYMANAGER=/bin/xdm
+
+openSUSE
+name is in lower case
+DISPLAYMANAGER="xdm"
+
+
+Selection via Startup Script
+SysV, Upstart, or systemd
+
+
+Configuring an XDMCP Server
+
+Configuring XDM
+- simplest of the major XDMCP servers
+- accepts usernames and passwords
+- does not enable users to perform other actions
+    - choosing which desktop environment to run
+        - must be configured through user login files
+
+/etc/X11/xdm/xdm-config
+
+# Remote configuration
+DisplayManager.requestPort: 0
+DisplayManager.requestPort: 177
+
+0: do not access a conventional server port
+177: a traditional server port
+
+- users on other computers can initiate remote X based logins to your computer via XDMCP
+- handy for local networks
+- security risk, disabled by default
+
+/etc/X11/xdm/Xaccess
+- for remote access
+- controls who may access the XDM server and in what ways
+
+*                       # wide open, anybody may connect
+*   CHOOSER BROADCAST   # anybody may request a chooser - a display of local systems that accept XDMCP configs
+
+To limit choices use an actual list instead of a wildcard
+*.pangaea.edu
+tux.example.com
+*.pangaea.edu CHOOSER BROADCAST
+
+/etc/X11/xdm/Xresources
+- hosts X resources
+- similar to environment variables that only apply to X based programs
+- xlogin*greeting resource to change text displayed by XDM
+
+Configuring KDM
+- partly based on XDM
+- uses XDM configuration files or
+    - /etc/X11/kdm
+    - /etc/kde/kdm
+    - /usr/lib/kde4/libexec
+- expands XDM by enabling users to select a session type at login
+- shutdown rom main KDM prompt
+- extra options set in kdmrc file
+
+Configuring GDM
+- /etc/X11/gdm
+- /etc/gdm
+- set local options in custom.conf file in gdm dir
+- GUI control tools (not always present on all systems)
+    - gdmconfig
+    - gdmsetup
+- also includes ability to choose login environment and shutdown
+- login prompts for both username and password
+
+Configuring LightDM
+- common XDMCP server that can be used in any desktop environment, independent of graphical library used
+- Ubuntu switched to Unity desktop, also incorporated LightDM to provide the graphical login environment
+- system generated LightDM configuration files
+    - /usr/share/lightdm/lightdm.conf.d
+        - can make new files in this dir
+    - /etc/lightdm/lightdm.conf
+- example: disable Guest login feature in the Ubuntu login window
+    - /etc/lightdm/lightdm.conf
+        SeatDefaults[
+        allow-guest=false
+
+
+Using X for Remote Access
+- X is a network enabled GUI
+
+X Client Server Principles
+- X is a server that runs on the computer at which the user sits, not a server in a DC
+- X server and client reside on the same computer
+- X clients are the programs that users run
+    - xterm
+    - xfontsel
+    - KMail
+    - LibreOffice
+
+Using Remote X Clients
+zeus : powerful machine that hosts programs
+apollo: client machine w/ keyboard and monitor
+
+1. Login to apollo and start X
+2. Open a terminal such as xterm on apollo
+3. `xhost +zeus` command tells apollo to accept for display in its X server data that originates from zeus
+4. Log into zeus from apollo using telnet/ssh
+5. On zeus type: ...this command tells zeus to use apollo for the display of X programs
+    a. bash: `export DISPLAY=apollo:0.0`
+    b. tcsh: `setenv DISPLAY apollog:0.0`
+6. Run program from the zeus command prompt and display on apollo
+    a. example: `loffice` to launch LibreOffice
+7. After you're done close the programs, log off zeus, and type `xhost -zeus`
+
+- some of these steps can be skipped
+    - SSH with X forwarding (skip steps 3, 5, and xhost command in 7)
+        - SSH intercepts attempts to display X information
+            - passes those requests on to the system that initiated the connection
+
+
+Encrypting X Connections with SSH
+- SSH can also tunnel network connections
+    - carry another protocol through it's own encrypted connection
+- adds the benefit of SSH encryption to X which X does not provide
+    - can slow down X access, however, enable SSH compression features to help mitigate
+- SSH tunneling options
+    - use the -X or -Y option to the SSH client program
+    - or set ForwardX11 or ForwardX11Trusted option to yes in /etc/ssh_config
+        - must also set X11Forwarding option to yes in /etc/sshd_config
+
+By default many Linux distros configure X to ignore true network connections by default
+Make the changes below and restart X
+
+GDM
+- older versions of GDM check the GDM configurationf file
+    - typically /etc/X11/gdm/gdm.conf
+        - line DisallowTCP=true and change to false
+- newer versions of GDM
+    - edit /etc/gdm/custom/conf
+        - add line DisallowTCP=false to the [security] section (add section if missing)
+
+KDM or XDM
+- these 2 XDMCP servers both rely on settings in the Xservers file
+    - /etc/X11/xdm for XDM
+    - look for line that starts with :0
+        - this line contains the command that KDM/XDM uses to launch the X server
+        - remove "-nolisten tcp" from the line if it exists
+
+Special openSUSE Configuration
+- /etc/sysconfig/displaymanager
+    - set DISPLAYMANAGER_XSERVER_TCP_PORT_6000_OPEN to yes
+
+X Launched from a Text Mode Login
+- if you login using text mode and type 'startx' to launch X you may need to modify the startx script
+    - usually stored in /usr/bin
+    - search this script for "-nolisten tcp" and remove
+
+VNC
+- VNC runs a special X server on the computer that is designed to be used from a distance
+
+
+X Accessibility
+- xorg.conf / XF86Config
+- keyboard repeat rate
+- Keyboard / Mouse accessibility issues
+    - onscreen keyboard
+- AccessX (deprecated)
+- sticky keys
+    - keyboard modifier keys (CTRL + ALT + SHIFT) to stick when pressed
+- toggle keys
+    - plays a sound cue when the locking keys (CAPS, NUM LOCK, SCROLL LOCK) are pressed
+    - high pitch activated
+    - low pitch deactivated
+- mouse keys
+    - use the cursor keypad on your keyboard to emulate a mouse
+- bounce or debouce keys
+    - if a user tends to press a single key accidentally multiple times
+- slow keys
+    - requires a key to be pressed longer than a specified period of time before it registers as a keypress
+    - usefule for users who tend to press keys accidentally
+- keyboard repeat rate
+    - repeat delay and rate can be set using sliders
+    - override settings in the X configuration file
+- time out
+    - sets a time after which its accessibility options will be disabled
+- mouse tracking and click options
+    - ordinary mouse tracking/click options are be adjusted to unusual options
+- simulated mouse clicks
+    - simulate a click after the mouse pointer stops moving
+    - simulate a double click whenever the mouse button is pressed for an extended period
+- mouse gestures
+    - activate program options by moving the mouse in particular ways
+
+Onscreen Keyboards
+Gnome Onscreen Keyboard (GOK) (older)
+Caribou (new)
+
+Screen Display Settings
+- font options, contrast settings, and screen magnification tools
+
+Adjusting Default Fonts
+- can access by typing `systemsettings` in terminal
+- select Configure Desktop from the main menu
+
+Adjust Contrast
+- from system settings
+
+Using Magnifier Tools
+- KMag part of the KDE suite
+- type `kmag`
+
+Configuring Linux to Speak
+- Orca: screen reader
+- Emacspeak: similar to Orca
+
+Using Braille Displays
+- special type of computer monitor
+- BRLTTY project provides a Linux daemon that redirects text mode console output to a Braille display
+
+
+Configuring Localization and Internationalization
+
+Setting a Linux Computer's Time Zone
+- Linux uses Coordinated Univeral Time (UTC) internally
+    - this is the time in Greenwich, England uncorrected for DST
+
+/etc/localtime
+- not plaintext
+- can be a file of its own or symlinked to another file
+→ ls -l /etc/localtime
+lrwxrwxrwx 1 root root 35 Dec  9 09:04 /etc/localtime -> /usr/share/zoneinfo/America/Chicago
+
+DATE
+print or set the system date and time
+→ date
+Sat Mar 24 07:11:04 CDT 2018
+
+1. Log in as root or acquire root privileges
+2. Change to the /etc/ dir
+3. View the contents of the /usr/share/zoneinfo/ dir
+4. If a localtime file exists in /etc/, delete or rename it
+    rm localtime
+5. Create a symbolic link from your chosen time zone file to the /etc/localtime file
+    ln -s /usr/share/zoneinfo/US/Eastern /etc/localtime
+    alt: cp the file instead
+
+/etc/timezone - Debian and similar distros
+/etc/sysconfig/clock - Fedora
+Update this file after changing the localtime
+
+→ cat /etc/timezone
+America/Chicago
+
+tzsetup, tzselect, tzconfig, or something similar
+
+Setting an Individual's Login's Time Zone
+TZ environment variable
+- holds info in any of the 3 formats
+
+    - most common format on Linux is :filename as in :/usr/share/zoneinfo/Europe/London
+
+    - common on non Linux systems is 'std offset' 
+        - std is a 3 char or longer time zone name (such as EST)
+        - offset is time relative to UTC
+            - positive values for west of the prime meridian
+            - negative values for east of the prime meridian
+        - ETS+5 specifies US Eastern time (used when DST is not in effect)
+
+    - if DST is in effect, a variant of the preceeding format is possible
+        - std offset dst[offset], start[/time], end[time]
+        - EST+5EDT,M3.10.0/2,M11.3.0/2
+            - US Eastern time w/ DST encoded with dates for 2013
+
+- generally you do not need to set the TZ environment variable
+- exmaple when you would: logging into a work computer physically located in San Fran while in London 
+    - export TZ=:/usr/share/zoneinfo/Europe/London
+    - sets timezone to London only for a single session and only from the shell this cmd was executed
+- do not use this method if all of a computer's programs should use the target time zone, use /etc/localtime instead
+
+
+Querying and Setting Your Locale
+
+What is locale?
+a locale is a way of specifying the computer's (or user's) language, country, and related info for the purpose
+of customizing displays
+
+[language[_territory][.codeset][@modifier]]
+
+language can be en (English), fs (French), ja (Japanese), etc.
+    - 2 or 3 letter codes for languages
+
+territory can be US (United States), FR (France), JP (Japan), etc.
+    - codes are for specific regions, generally nations
+
+codeset can be ASCII, UTF-8, or other encoding names
+
+ASCII: American Standard Code for Information Interchange
+    - oldest and most primitive
+    - supports 7 bit encodings (generally stored in 8 bit bytes)
+    - handles English, including common punctuation and symbols
+    - can't handle char used in many non english languages
+
+UTF-8: Unicode Transformation Format
+    - starts with ASCII and extends it by supporting variable byte extensions
+        - a single char can take anywhere from 1 to 4 bytes to be encoded
+    - can encode text in any language supported by Unicode
+        - Unicode: character set designed to support as many languages as possible
+
+modifier is a locale specific code that modifies how it works
+    - may affect the sort order in a language specific manner
+
+What is Your Locale?
+
+→ /usr/bin/locale
+LANG=en_US.UTF-8 (takes the same type of locale specification as the LC_* variables)
+LANGUAGE=
+LC_CTYPE="en_US.UTF-8"
+LC_NUMERIC="en_US.UTF-8"
+LC_TIME="en_US.UTF-8"
+LC_COLLATE="en_US.UTF-8"
+LC_MONETARY="en_US.UTF-8"
+LC_MESSAGES="en_US.UTF-8"
+LC_PAPER="en_US.UTF-8" (paper size)
+LC_NAME="en_US.UTF-8"
+LC_ADDRESS="en_US.UTF-8"
+LC_TELEPHONE="en_US.UTF-8"
+LC_MEASUREMENT="en_US.UTF-8" (measurement units)
+LC_IDENTIFICATION="en_US.UTF-8"
+LC_ALL= (variable that is a sort of master override, if set overrides all of the other LC_* variables)
+
+-a, --all-locales : display a list of all available locales
+
+→  locale -a
+C
+C.UTF-8
+en_AG
+en_AG.utf8
+en_AU.utf8
+en_BW.utf8
+en_CA.utf8
+en_DK.utf8
+en_GB.utf8
+en_HK.utf8
+en_IE.utf8
+en_IN
+en_IN.utf8
+en_NG
+en_NG.utf8
+en_NZ.utf8
+en_PH.utf8
+en_SG.utf8
+en_US.utf8
+en_ZA.utf8
+en_ZM
+en_ZM.utf8
+en_ZW.utf8
+POSIX
+
+Changing Your Locale
+- first verify locale is available with `locale -a`
+    - if not, need to install the package
+    - Ubuntu: many more locales can be installed from packages called language-support-??
+        - ?? is a 2 char language code
+
+Change Locale Temporarily
+- Great Britain in this example
+- change only for the session and only affects the current shell
+- will not change already running programs
+export LANG=en_GB.UTF-8
+export LC_ALL=en_GB.UTF-8
+
+Change Locale Permanently
+- adjust bash startup script files
+    - ~/.bashrc
+    - /etc/profile
+
+X's configuration file (xorg.conf or XF86Config) includes an option called XkbLayout in the keyboard [InputDevice]
+- option takes a partial or complete locale specification but converted to lowercase
+    - us or en_us.utf-8
+    - adjusting option provides access to language or country specific keys
+    - need to restart X for the changes to take effect
+
+LANG=C
+- setting LANG to C: programs that see this environment variable display output w/o passing it through locale translations 
+- useful if a program's output is being corrupted by the locale
+    - particularly in pipelines and scripts that pass one progra's data to another program in binary form
+
+Modifying Text File Locales
+- can be necessary to access textual data that originated from one program on a system that used one encoding but processed the data with a program that doesn't support that encoding
+
+ICONV
+- convert text from one character encoding to another
+iconv -f encoding [-t encoding] [inputfile]...
+-f : from encoding
+-t : to encoding
+-l : list all known char set encodings
+
+omitting the 'to encoding' iconv uses your locale for guidance
+- sends output to SDTOUT, need to redirect to store in a file
+
+iconv -f iso-8859-1 -t UTF-8 umlautfile.txt > unlautfile-utf8.txt
+
+
+Configuring Printing
+- applications submit print jobs as PostScript documents
+- most Linux systems are not connected to true PostScript printers
+- highly network orientated, accepts print jobs from local and remote systems
+    - even local print jobs are submitted using network protocols
+
+Ghostscript : converts the print job into a form that the system's printer can actually handle
+
+CUPS : Common Unix Printing System
+- manages the print queue
+- sends the job to the printer
+
+Conceptualizing the Linux Print Architecture
+- printing is built around the concept of a print queue
+    - holding area where files wait to be printed
+
+LPR - off line print
+- users submit print jobs using lpr
+- lrp sends the print job into a specified queue
+- queue corresponds to a dir on the disk
+    - typically /var/spool/cups
+- CUPS daemon runs in the background, watching for print jobs to be submitted
+
+CUPS - most common printing system on modern Linux systems
+LDP - older systems using BSD Line Printer Daemon
+
+Understand PostScript and Ghostscript
+- printer driver
+    - stands between the application and the printer queue
+    - in Linux the printer driver is part of Ghostscript
+        - exists as part of the printer queue, albeit a late part
+- Ghostscript serves as a way to translate PostScript into forms that can be understood by many different printers
+
+PostScript
+- PostScript printers were popular in the 1980s 
+- programs can produce either PostScript or Printer Control Language (PCL) output
+- problem with PostScript as a standard is that it's uncommon on the low/mid tier printers
+    - to print to such printes using traditional Unix programs that generate PostScript output
+        - need a translator like Ghostscript
+
+Ghostscript : A PostScript Translator
+- Ghostscript is a PostScript interpreter that runs on a computer
+- takes PostScript as input, parses it, and produces output in any of dozens of different bitmap formats
+    - includes formats that can be accepted by many non PostScript printers
+- a way to turn many inexpensive printers into Linux compatible PostScript printers at a very low cost
+
+- drawback: produces very large files
+    - PostScript file that produces a page filled with text: few kilobytes in size
+    - if the page is to be printed on a 600 dots per inch (dpi) printer using Ghostscript: likely several MB 
+    - not a drawback on modern hardware
+
+Squeezing Ghostscript into the Queue
+- generally done via a smart filter
+    - examines the file that's being printed
+    - determines its type
+    - passes the file through one or more additional programs before the printing software sends to the printer
+    - smart filter can be configured to call Ghostscript w/ whatever params to produce output for the queue's printer
+- CUPS ships with its own set of smart filters
+
+Running a Printing System
+ps ax | grep cups
+
+Configuring CUPS
+/etc/cups/
+- can edit config files directly
+
+Editing the CUPS Configuration Files
+/etc/cups/printers.conf
+- add printers to this file
+- each definition begins with the name of a printer
+    - identified by 'DefaultPrinter' or 'Printer'
+
+<DefaultPrinter okidata> # Start of a definition for a printer queue
+
+other lines: 
+- set assorted printer options
+- printer's location
+- current status, etc.
+- additional options stored in a PostScript Printer Definition (PPD) file
+    - named after the queue and stored in /etc/cups/ppd/
+    - PPD follows an industry standard format
+
+</Printer>               # End of this definition
+
+Internet Printing Protocol (IPP) used by CUPS
+- supports browsing: enabled computers on a network to exchange printer lists automatically
+
+/etc/cups/cupsd.conf
+- contains configuration blocks similar to Apache web server
+
+<Location /printers>
+Order Deny,Allow
+Deny from All
+BrowseAllow from 127.0.0.1
+BrowseAllow from 192.168.1.0/24
+BrowseAllow from @LOCAL
+Allow from 127.0.0.1
+Allow from 192.168.1.0/24
+Allow from @LOCAL
+</Location>
+
+/printers location section of the config file controls access to the printers themselves
+/ root location that specifies default access permissions to all other locations
+/admin location that controls access to CUPS administrative functions
+
+Directive Order
+- Order Deny,Allow line
+    - tells CUPS with order it should apply allow and deny directives
+
+Default Policy
+- Deny from All
+    - tells the system to refuse all connections except those are explicitly permitted
+
+Browse Control Lines
+- BrowseAllow
+    - tells CUPS which other systems it should accept browsing requests
+    - in the example
+        - from itself (127.0.0.1)
+        - from systems on 192.168.1.0/24 network
+        - from systems connected to local subnets (@LOCAL)
+
+Access Control Lines
+- Allow
+    - give specified systems non-browse access to printers
+    - those systems can print to local printers
+    - in most cases Allow lines are the same as BrowseAllow lines
+
+Alternate
+- add Allow from All line
+    - then create BrowseDeny and Deny lines to limit access
+
+Enable Browsing
+- 'Browsing' accepts On (default) and Off values
+
+Browsing Access Control
+- 'BrowseAddress' specifies the broadcast address to which browsing information should be sent
+- Example: to broadcast data on your printers to the 192.168.1.0/24 subnet
+    - BrowseAddress 192.168.1.255
+
+Obtaining CUPS Printer Definitions
+- most Linux distros ship w/ CUPS smart filter support for a variety of printers
+- definitions may consist of PPD files, appropriate behind the scenes 'glue' to tell CUPS how to use them, and possibly ghost script driver files
+
+Your Linux Distribution
+- many distros ship extra printer definitions under various names
+
+Foomatic
+- Linux Printing website hosts a set of utilities and printer definitions
+
+Gutenprint
+- Gutenprint drivers, origiinally known as GIMP Print, support a wide variety of printers
+
+CUPS DDK
+- CUPS Driver Development Kit (DDK) is a set of tools designed to simplify CUPS driver development
+
+Printer Manufacturers
+- some printer manufacturer's offer CUPS drivers (can be proprietary)
+
+Using the Web Based CUPS Utilities
+- CUPS IPP printing system is closely related to the HTTP protocol
+- Default port of 631
+
+Adding a Printer
+1. Administration tab > Add Printer
+2. Local printer, discovered network printers, and other network printers
+3. Network printer > add complete path to the device
+    - lpd://printserv/brother
+4. Enter printer's name, description, and location
+    - can also select Share This Printer to share printer definition with other CUPS-using computers
+5. Select a Manufacturer and Continue
+    - Alt: point directly to a PPD file if you have one
+6. Select a printer Model and Add Printer
+    - Alt: point directly to a PPD file if you have one
+7. Set default options
+    - paper size, print resolution, etc.
+
+Print a test page to ensure this is setup correctly
+- Click link to printer > Print Test Page from the button selector that reads Maintenance
+
+Printing to Network Printers
+- if a network hosts Windows computers then SMB/CIFS is likely used
+- Linux's samba server also implements this protocol
+    - can be used for sharing printers from Linux
+- can also print to an SMB/CIFS printer queue from a Linux system
+    - slect an SMB/CIFS queue in the printer configuration tool
+    - from above step #2 you would select Windows Printer via SAMBA
+        - smb://username:password@SERVER/SHARE
+
+- SMB/CIFS printers hosted by Windows systems are usually non-PostScript models
+    - must select a local Linux smart filter and Ghostscript driver
+- Printers hosted by Linux systems are frequently configured to act list PostScript printers
+    - select a PostScript driver
+
+- old LPD protocol
+    - lpd://hostname/queue
+- same format to print to a CUPS server if browsing is disabled on the network
+    - ipp://hostname/queue
+
+- IPP  /  LPD  /  SMB/CIFS
+    - IPP is the simplest to configure, supports browsing
+    - IPP best choice for Linux to Linux printing
+
+    - LDP for when CUPS is not in use
+    - LDP generally easier to configure that SMB/CIFS
+    - LDP does not require username/password to control access
+
+    - SMB/CIFS security is password orientated
+    - typically clients store password unencrypted on the drive (security liability)
+
+Monitoring and Controlling the Print Queue
+- several utilities: lpr, lpq, lprm, lpc
+    - -Pqueuename (no space or add a space) parameter to specify that they operate on a specific print queue
+
+Printing Files with lpr
+- accessible to ordinary users as well as root
+- lpr to submit print jobs
+-r: lpr sends a copy of the file you print into the queue leaving the original untouched
+    - this options causes lpr to delete the original file after printing it
+-h: suppress the banner for a single print job
+-J jobname: name is normally the name of the first file in the print job, can change manually
+    -C and -T options are synonymous with -J
+-m username: send emai to username when the print job is complete
+-# 3: specify the number of copies of a print job
+    - -# 3: print 3 copies of a job
+
+lpr -Plexmark -m cjones report.txt
+
+mpage -Plexmark report.ps
+- prints reports.ps file reduces to fit four pages pe sheet
+    - can change the number of souces pages to fit with the -1, -2, -4, and -8 options
+
+Displaying Print Queue Information with lpq
+
+lsq -Php4000
+
+hp4000 is ready and printing
+Rank    Owner   Job     File(s)     Total Size
+active  rodsmit 1630    file:///    90112 bytes
+
+Can delete or reorder using the job number
+
+Removing Print Jobs with lprm
+- if used with a number, that numer is the job ID or the job that's to be deleted
+- passes a dash -, it removes allof the jobs belonging to the user
+- ordinary users may remove only their own jobs from the queue, root can remove anybody's jobs
+
+Controlling the Print Queue with lpc
+- original BSD LPD system the lpc utility starts, stops, and reorders jobs within print queues
+- CUPS provides an lpc command, however, it has few features. Recommend using web interface instead
+
+- can disable a queue by clicking Stop Printer link for the printer in the CUPS web interface
+- can use cupsenable, cupsdisable, and lpmove to control the queue
+    - enable a queue, disable a queue, and move a job from one queue to another
+
+1. http://localhost:631
+    - click Printers
+2. `lpr -Php4000 /etc/fstab` to obtain a printout of this system configuration file
+    - verify it printed correctly
+3. `lpq -Php4000` to view the contents of the hp4000 queue
+4. `lpr -Php4000 /etc/fstab;lsq -Php4000`
+    - prints another copy of the file and immediately displays the contents of the print queue
+5. in another shell type `su` for root access
+6. in your root shell type `cupsdisable hp4000`
+    - disables the queue
+    - jobs are still accepted, however, they won't print
+7. `lpr -Php4000 /etc/fstab`
+    - queue is disabled, won't print
+8. `lpq -Php4000` to view the contents of the print queue
+    - "hp4000 is not ready"
+    - the job number is available
+9. `lprm -Php4000 497`
+    - remove
+10. `lpq -Php4000` to view the contents of the print queue
+    - job should no longer be present
+11. `cupsenable hp4000`
+    - re-enable the queue
+12. `lpr -Php4000 /etc/fstab`
+    - should print again
+
+Summary
+- X is Linux's GUI system
+- X.org-X11
+    - uses xorg.conf
+- XFree86
+    - uses XF86Config configuration file
+- Xft - most modern programs are now using this new font system instead of X core fonts
+- X's GUI login system uses an XDMCP server
+    - starts X and manages the X display
+    - XDM - less sophisticated than KDM and GDM
+    - KDM
+    - GDM
+    - LightDM
+- Accessibility
+    - adjust font size
+    - screen contrast
+    - other diplay features to improve legibility
+    - screen magnifier
+    - screen reader or Braille display
+    - kyeboard repeat rate
+    - sticky keys
+    - mouse tracking speed
+    - click sensitivity
+- Printer
+    - CUPS package manages printers in Linux by accepting local or remote print jobs
+    - passing the jobs through a smart filter for processing
+    - queuing jobs so they print in a reasonable order
+    - most CUPS configuration is handled via the web interface - also set via text config files
+
+Exam Essentials
+
+- Name the major X servers for Linux
+    - XFree86 has been the traditional Linux S server
+    - X.org-X11 (based on XFree86) new standard in 2004
+    - Accelerated X is a commercial X server
+        - sometimes supports video cards that aren't supported by XFree86 or X.org-X11
+
+- Describe the X configuration file format
+    - configuration file is broken into multiple sections
+    - each section begins with the keyword Section and ends with EndSection
+    - each section sets options related to a single X feature
+        - loading modules
+        - specifying the mouse type
+        - describing the screen resolution and color depth
+
+- Summarize the difference between X core fonts, a font server, and Xft fonts
+    - X core fonts are managed directly by X
+        - lack modern font features such as font smoothing
+    - Font servers integrate with the X core fonts but run seperate programs and may optionally deliver fonts to
+        multiple computers on the network
+    - Xft fonts bypass the X core font system to provide client side fonts in a way that supports modern features
+        - ie font smoothing
+
+- Explain the role of an XDMCP server
+    - An XDMCP server (XDM, KDM, GDM) launches X and controls access to X via a login prompt
+        - serves as Linux's GUI login system
+    - XDMCP servers are also network enabled, providing a way to log in remotely from another X server
+
+- Describe X's client server model
+    - An X server runs on the user's computer to control the display and accept input from the keyboard/mouse
+    - client programs run on the same computer or on a remote computer
+    - these client programs treat the X server much like other servers, requesting input and sending output to them
+
+- Explain the benefits of using SSH for remote X access
+    - SSH can simplify remote X based network access by reducing the number of steps required to run X programs from a          remote computer
+    - SSH encrypts data
+
+- Summarize X accessibility features
+    - keyboard / mouse / screen options / text readers / Braille displays
+
+- Describe how to set a time zone in Linux
+    - binary file /etc/localtime
+    - this file is copied or linked from a repo of such files at system installation
+    - can replace the file at any time
+
+- Explain the role of Ghostscript in Linux printing
+    - PostScript is the standard Linux printing language
+    - Ghostscript converts PostScript into bitmap formats that are acceptable to non-PostScript printers
+    - Ghostscript is a critical translation step in many Linux print queues - not required for PostScript printers
+
+- Summarize how print jobs are submitted and managed under Linux
+    - use lrp to submit a print job for printing
+    - an application can use lrp itself or implement its functionality directly
+    - lpq utility summarizes jobs in a queue
+    - lprm can remove print jobs form a queue
+
+Chapter 7 Administering the System
+- Manage user and group accounts and related system files
+- Automate system administration taks by scheduling jobs
+- Maintain system time
+- System logging
+
+Managing Users and Groups
+- Linus is a multiuser system that relies on accounts
+- accounts: data structures and procedures used to identify individual users of a computer
+
+Learning about Linux User Accounts
+- typical linux accounts are individual user accounts identified via the account username
+- linux accounts can be accounts for system services called daemons
+- daemons: typically a program that provides a particular service, such as the CUPS daemon
+    - this daemon runs continuously in the background waiting for an event to trigger it to perform some service
+
+Usernames
+- traditional practice is to use entirely lowercase letters in usernames such as sally, sam, etc w/o numbers/symb
+- usernames with mixed case are treated uniquely
+
+Linking Users Together via Groups
+- Linux uses groups as a means to organize users
+- groups are not accounts
+- every file on a Linux system is associated with a specific user and a specific group
+- /etc/group file
+    - control group membership
+    - contains a list of groups and the group members
+- each user has a default primary group
+    - the user's primary group is set in the user's configuration /etc/passwd record
+- /etc/passwd file defines each system account via individual account configuration records
+- when users login their group membership is set to their primary group
+
+newgrp - change to a new group
+
+newgrp project2 to switch to the project2 gorup
+- if the user typing this command is listed as a project2 group member in the /etc/group file then the current group membership changes
+- now any files created by that user will be associated with the project2 group
+- users can change a file's associated group with chgrp and chown
+
+Mapping UIDs and GIDs to Users and Groups
+- internally Linux tracks users and groups by their ID number, not by their name
+- uses /etc/passwd and /etc/group to locate the number associated with the name
+- first 100 user and group IDs (0-99) are reserved for system use
+- UID 0 is the root user and group
+- aside from 0 there isn't a full standard for UIDs and GIDs
+- first normal user account is usually assigned a UID of 500 or 1000
+    - then 1001, 1002, etc
+- when you remove an account that account's ID number may be re-used
+    - however, if subsequent numbers are in use the automatic account creation tools typically don't do so
+    - can lead to confusion and security issues
+- account numbering limits are set in the /etc/login.defs file
+    - UID_MIN and UID_MAX define min/max UID values for ordinary user accounts
+    - gnerally 1000 and 60000
+- should avoid creating multiple users or groups that share an ID
+- hackers will sometimes create accounts with a UID of 0 on systems they invade
+    - UID of 0 is effectively a root acount with all the poewr of a superuser
+
+Configuring User Accounts
+
+Adding Users
+
+useradd (or adduser in some distros)
+
+useradd 
+[-c comment] 
+[-d home-dir] 
+[-e expire-date] 
+[-f inactive-days] 
+[-g default-group] 
+[-G group[,...]]
+[-m [-k skeleton-dir] | -M]
+[-p password]
+[-s shell]
+[-u UID [-o]]
+[-r]
+[-N]
+username
+
+some parameters modify settings that are only valid when the system stores password in the shadow file
+- /etc/shadow
+
+useradd username
+-c comment : store public information such as a user's office or telephone # or real name or no info
+-d home-dir : defaults to /home/username
+-e expire-date yyy-mm-dd : set expire date
+-f inactive-days : account is disabled a certain number of days after a password expires, -1 disables (default)
+-g default-group
+-G group : sets the names or GIDS of one or more groups to which the user belongs
+-m, --create-home : create the user's home dir if it does not exist
+    - depends on /etc/login.defs CREATE_HOME setting, if set to yes then -m option has no effect
+-k, --skel: contains files and dir to be copied in the user's home dir when the home dir is created (/etc/skel)
+-M : do not create a home dir - even if /etc/login.defs specifies that this action is the default
+-p, --password: passes the pre-hashed password for the user
+    - password is added, unchanged, to the /etc/passwd or /etc/shadow file
+    - typing an unhashed password won't work as you expect
+    - most useful in scripts, can hash the password with crypt and then send the hashed result to useradd
+-s, --shell: default login shell, defaults to /bin/bash
+-u, --uid: creates an account with the specified user ID value (positive int) -o option allows the number to be reused
+-r, --system: create a system account, an account with a value less than UID_MIN, no home dir for sys accounts
+-N, --no-user-group: do not create a group with the same name as the user
+
+`useradd -m -d /home2/sally -g project4 -G project1,project4 sally`
+
+Modifying User Accounts
+
+Setting a Password
+passwd [-k] [-l] [-u [-f]] [-d] [-S] [username]
+
+only root may specify a username, regular users can just run passwd
+
+-k, --keep-tokens: indicates that the system should update an expired account
+-l, --lock: locks an account by prefixing the hashed password with an exclamation mark(!)
+    - user can no longer login, however, files are still available
+-u, --unlock: unlocks an account by removing the !, can unlock a fresh account, however, there is no password
+    - use -f to force unlock an account w/ no password
+-d, --delete: removes the password from the account
+-S, --status: displays information about the password for an account
+    - jteumer P 12/09/2017 0 99999 7 -1
+    - melanie L 04/01/2018 0 99999 7 -1
+
+`passwd sally`
+
+Linux passwords may consist of letters, numbers, and punctuation (case sensitive)
+
+usermod - modify a user account
+-d: changes the user's home dir but doesn't move any files, use with -m to move user's files to the new location
+-l: changes the user's login name
+    - usermod -l sjones sally changes the username from sally to sjones
+-L, -U: lock and unlock a user's password
+
+changing the account UID does not change the UIDs associated with the user's existing files
+    - user can lose access to these files
+    - use chown to remedy
+
+-G: add a user to new groups, be aware that any groups not listed will be removed
+    - good idea to use -a and -G to add a user to a new group without having to list old groups
+
+chage - change user password expiry information
+- configure linux accounts so that they auto expire if either 2 conditions are true:
+1. password has not been changed in a specified time period
+2. system date is past a predetermined time
+
+chage [-l] [-m mindays] [-M maxdays] [-d lastday] [-I inactivedays] [-E expiredate] [-W warndays] username
+
+usually only used by root with the exception of the -l option
+
+sudo chage -l melanie
+Last password change					: Apr 01, 2018
+Password expires					: never
+Password inactive					: never
+Account expires						: never
+Minimum number of days between password change		: 0
+Maximum number of days between password change		: 99999
+Number of days of warning before password expires	: 7
+
+-m : sets the min number of days between password changes
+    0: user can change a password multiple times a day
+    1: user can change a password once a day
+    2: user can change a password twice a day, etc.
+-M : sets the max number of days that may password between password changes
+    30: requires a password change approx once a month
+-d lastday: sets the last day a password was changed YYYY/MM/DD
+-I inactivedays: sets the number of days between password expiration and account disablement
+    - expired account may not be used or may force the user to change the password immediately
+-E expiredate: -E 2016/05/21 have an account expire, can also be expressed as the number of days since 01/01/1970
+-W warndays: sets the number of days before account expiration that the system will send warnings to the user
+    - warnings are usually only shown to text mode login users, not GUI logins, file share users, etc.
+
+Understanding Account Configuration Files
+/etc/passd and /etc/shadow can be modified directly
+    - dangerous and not recommended
+    - use pwck utility to verify the files and make sure they are in sync with each other if you do so
+
+/etc/password record
+sally:x:1029:503:Sally Jones:/home/sally:/bin/bash
+
+Username: first field: sally
+Password: X indicates a shadow password is in use (/etc/shadow)
+    - a hashed password instead if shadow is not used
+UID: 1029 user ID
+Primary GID: default login group ID, 503
+Comment: here it is the user's full name, Sally Jones
+Home Dir: /home/sally
+Default Shell: /bin/bash, /bin/tcsh, etc.
+    - can use /bin/shutdown so if the account logs in the computer immediately shuts down
+    - /bin/false: prevents users from logging in as ording users but leaves other utilities intact
+        - users can still receive mail and retrieve it via remote mail protocols like POP or IMAP
+    - /bin/password: users may change their passwords remotely but can't login using a command shell
+
+/etc/shadow record
+sally:$6$EmoFkLZPkHkpczVN2XRcMdyj8/ZeeT5UnTQ:15505:0:-1:7:-1:-1:
+
+Username: sally
+Password: stored in hashed form
+    - * in the password field indicates that the account does not accept logins
+        - account can still run cron and at jobs in most cases
+    - ! in front of the password denotes that the account is locked
+    - !! denotes that a password has not been set
+Last Password Change: 15505 is the date of the last password change (number of days since 01/01/1970)
+Days until a Change is Allowed: # of days before a password change is allowed (0 in this example)
+Days before a Change is Required: # of days after the last password change before another password change is required
+Days of Warning before Password Expiration: warn user when an expiration date is approaching, 7 is typical
+Days between Expiration and Deactivation: allows a gap between expiration of an account and its complete deactivation
+    - expired: can't be uses or requires that the user change the password immediately after logging in
+    - deactivated: password is erased, account can't be used until an admin reactivates it
+Expiration Date: shows the date on which the account will expire, expressed in # of days since 01/01/1970
+Special Flag: reserved for future use and normally is not used or contains a meaningless value
+
+value of -1 or 999999 indicates that the relevant feature has been disabled
+
+Network Account Databases
+- Lightweight Directory Access Protocol (LDAP)
+- Kerberos realms
+- Active Directory (AD) domains
+
+One centralized computer that maintains account database management
+- then most user accounts won't appear in /etc/passwd, /etc/shadow or groups in /etc/group
+- these files will have local users/groups only
+
+Deleting Accounts
+
+userdel - delete a user account and related files
+
+-r, --remove: causes the system to remove the user's mail spool, all files in the user's home dir, and home dir itself
+-f, --force: force deletion if the user is logged in
+    - also force removes mail spool if it's owned by another user
+    - also force removes the home dir if it's shared with another user
+-h, --help: summarizes userdel options
+
+`find / -uid 1029` to find user files to delete
+
+
+Configuring Groups
+
+groupadd - create a new group
+
+groupadd [-g GID] [-o]] [-r] [-f] groupname
+
+-g, --gid : specify a GID: by default groupadd uses the next available GID
+-r, --system : create a system group
+    - creates a group with a GID less than SYS_GID_MIN as defined in /etc/login.defs
+    - normally used by system tools or to help control access to system resources
+-f: supresses error if the group already exists
+
+`groupadd Production`
+
+
+Modifying Group Information
+
+groupmod - modify a group definition on the system
+
+groupmod [-g GID [-o]] [-n newgroupname] oldgroupname
+-g GID, specify a new group ID
+-n : specify a new group name
+
+gpasswd - administer /etc/group and /etc/gshadow
+gpasswd [-a user] [-d user] [-R] [-r] [-A user[,...]] [-M user[,...]] group
+
+-a : add user to the group
+-d : deletes user from the group
+-R : configures the group to not allow anybody to become a member through newgrp
+-r : removes the password from a group
+-A : root user may use to specify group administrators
+    - may add and remove members from a group
+    - can change group password
+-M : works like -A, also adds the user(s) to the list of group members
+
+Group passwords are rarely used and are a security risk
+
+Understanding Group Configuration Files
+/etc/group
+
+project1:x:504:sally,sam,ellen,george
+
+Group Name: project1
+Password: x
+GID: group ID number 504
+User list: comma delimited list of group members
+
+
+Deleting Groups
+
+`groupdel project3`
+find / -gid 1003 to cleanup files
+
+
+Viewing Individual Account Records
+
+`grep Christine /etc/passwd`
+
+getent: access records stored in one of the system databases - has to be configured as Name Service Switch (NSS) file
+- passwd /etc/passwd
+- shadow /etc/shadow
+- group /etc/group
+
+getent database key
+- if the key is omitted then the entire database is displayed
+
+`getent passwd jteumer`
+`getent group jteumer`
+`groups jteumer`
+
+
+Tuning User and System Environments
+/etc/profile
+/etc/profile.d/
+    /etc/bash.bashrc
+    /etc/bashrc
+~/.bashrc
+~/.bash_profile
+~/.bash_login
+~/.profile
+
+- Skeleton directory
+/etc/skel
+- this contains the .bash* files that are copied to a new user account
+
+
+Using Log and Journal Files
+/var/log
+syslogd & systemd
+
+syslogd
+- daemon log manager
+- often installed from a package called sysklogd
+- handles messages from server and other user mode programs
+- often paired with a daemon called klogd
+    - daemon manages logging of kernel messages
+- /etc/syslog.conf
+
+Alternatives
+- syslog-ng
+    - supports advanced options
+- rsyslogd
+    - improved filtering capabilities and higher performance
+    - "rocket-fast" system for log processing
+    - /etc/rsyslog.conf
+
+logging daemons
+- provide a unified means of handling log files
+- runs in the background and accepts data delivered from servers / programs configured to use the daemon
+- uses this info to classify messages and direct them to an appropriate log file
+
+Setting Logging Options
+- /etc/syslog.conf
+facility.priority   action
+
+- facility
+    - type of program or tool that generated the message to be logged
+- priority
+    - importance
+- action
+    - file, remote computer, or other location that's to accept the message
+- selector
+    - facility and priority are often referred to collectively
+
+facility valid params
+- authpriv: security and authorization messages
+- cron: cron daemon messages
+- daemon: various daemon messages
+- kern: kernel messages
+- lpr: printing system messages
+- mail: mail system messages
+- news: news daemon messages
+- syslog: internally generated syslog messages
+- user: user level messages
+- uucp: unix to unix copy program daemon messages
+- local10 through local7: locally defined application messages
+
+facility deprecated
+- security
+- auth
+- mark
+
+priority valid params
+- debug: debugging level messages for application development (least important)
+- info: normal operation
+- notice: abnormal messages (not a concern)
+- warning: indicates an error will occur if action is not taken
+- err: non urgent failure and error messages
+- crit: urgent failure and error messages (secondary systems)
+- alert: urgent failure and error messages (primary systems)
+- emerg: panic messages indicating system is unusable (most important)
+
+priority deprecated
+- error > err
+- warn > warning
+- panic > emerg
+
+
+1. message is sent to the sys logger w/ a priority param
+2. logger logs the message to a file if you've configured it to log messages of that level or higher
+3. a priority code of alert > logs messages classified as alert or emerg
+
+Exception
+1. precede the priority param with an equal sign =
+    - =crit, =alert
+2. describes what to do w/ messages of crit priority only
+3. - ! reverses match
+    - !crit causes messages below crit priority to be logged
+
+Multiple selectors
+ - delimited by a semicolon ;
+
+action param is a filename
+- typically in /var/log
+- messages, syslog, secure files are 3 common log files
+- remote : preceded by an at sign @
+
+Examples
+1. mail.*   /var/log/mail
+    - sends all log entries identified by the originating program as related to mail to the /var/log/mail file 
+
+2. *.emerg  *
+    - sends all emerg level messages to all users who are logged into the computer using text mode tools
+
+3. kern.*    /var/log/kernel
+    - logs all kernel messages to file
+
+4. kern.crit    @logger.pangaea.edu
+    - sends critical kernel messages to a remote computer
+
+5. kern.info;kern.!err     /var/log/kernel-info
+    - sends kernel messages between info and err in priority to file
+    - because err is the priority immediately above crit and info is the lowest
+        - these 4 lines cause all kernel messages to be logged 2 or 3 times
+            - once to /var/log/kernel
+            - as well as either to the remote sys and the console
+            - or to /var/log/kernel-info
+
+
+Manually Logging Data
+
+`logger` command
+logger [-isd] [-f file] [-p pri] [-t tag] [-u socket] [message]
+
+Logger Options
+-i: records the process ID (PID) of the logger process along w/ other data
+-s: echo data to STDERR as well as to the log file, interactive script might use this to warn users
+-d: causes logger to use datagrams rather than a stream connection to the system logger socket
+    - advanced feature, only use if instructed in documentation & have understanding of networking issues involved
+-f file: log contents to a file
+-p priority: specify priority
+-t tag: useful if you want to identify a script or other program that created the log entry
+-u socket: can log directly to a network socket
+- if -f is not specified you can type a message to be logged and terminate input with CTRL + D
+
+logger shutting down for system maintenance
+- adds a line to /var/log/messages or syslog
+
+Rotating Log Files
+- log files can grow to consume all available space
+- linux employs log file rotation tools to rename and optionally compress the current log files, delete old log files, and force logging system to begin using new log files
+
+`logrotate`
+- typically called via a cron job
+- /etc/logrotate.conf
+- /etc/logrotate.d/
+
+> cat /etc/logrotate.conf
+    # see "man logrotate" for details
+    # rotate log files weekly
+    weekly
+
+    # use the syslog group by default, since this is the owning group
+    # of /var/log/syslog.
+    su root syslog
+
+    # keep 4 weeks worth of backlogs
+    rotate 4
+
+    # create new (empty) log files after rotating old ones
+    create
+
+    # uncomment this if you want your log files compressed
+    #compress
+
+    # packages drop log rotation information into this directory
+    include /etc/logrotate.d
+
+    # no packages own wtmp, or btmp -- we'll rotate them here
+    /var/log/wtmp {
+        missingok
+        monthly
+        create 0664 root utmp
+        rotate 1
+    }
+
+    /var/log/btmp {
+        missingok
+        monthly
+        create 0660 root utmp
+        rotate 1
+    }
+
+    # system-specific logs may be configured here
+
+Rotated File Naming
+- ordinarily rotated log files acquire numbers in their names such as messages.1 for the first rotation
+- 'datetext' option uses a date code instead, messages-20130210
+
+Compression Options
+- gzip by default
+- can specify an alternative with compresscmd (bzip2)
+
+Creation of New Log Files
+- create option causes logrotate to create a new log file for use by the syslogger or program
+- option takes a file mode, an owner and a group as additional options
+- some programs use 'copytruncate' instead
+    - tells logrotate to copy the old log file to a new name and then clear all of the data out of the original file
+
+Time Options
+- daily, weekly, monthly: rotate logs at this interval
+
+Size Options
+- maximum size for a log file (in bytes by default)
+- add k, M, G for kilobytes, megabytes, gigabytes
+
+Rotation Options
+- causes x copies of old log files to be maintained
+- example: rotate 2
+    - /var/log/messages
+    - /var/log/messages.1
+    - /var/log/messages.2
+    When the file is rotated the following occurs in the /var/log dir
+    1. messages.2 is deleted
+    2. messages.1 is renamed to messages.2
+    3. messages is renamed to messages.1
+    4. a new messages file is created
+
+Mail Options
+- will email a log file to the specified address when it's rotated out of existence
+
+Scripts
+- prerotate
+- postrotate
+- treated as scripts that run immediately before or after log file rotation
+- these scripts end with the endscript keyword
+- frequently used to force syslogd or a server to begin using a new log file
+
+Reviewing Log File Contents
+
+Paging Through Whole Log Files
+- use a pager program such as less to view the contents of a log file or use a text editor
+
+Searching for Keywords
+- grep to pull lines out of logs
+- `grep eth0 /var/log/*`
+
+Examaning the Start or End of a File
+- head or tail commands
+
+Monitoring Log Files
+- tail can monitor a file on an ongoing basis
+    - tial -f /var/log/messages
+
+
+Exploring the systemd Journal System
+- systemd journal service provides backward compatibility for most syslogd functionality
+
+Three Primary systemd journal service components:
+1. daemon: the systemd journaling service is handled by the systemd-journald daemon
+2. configuration file: the journal service's configuration is set in the /etc/systemd/journald.conf file
+3. search utility: the program used to search through the journal log files is journalctl
+
+Understanding systemd-journald
+- system service that brings together and stores logging data
+- journal entries are created from server messages, user mode program messages, and kernel messages
+- journal entries are created from ALL system service messages
+    - such as generated error messages and boot time communications
+- the service stores persistent journal data in the /var/log/journal dir
+
+Two types of journal message data files
+1. system
+- owned by a special group - systemd-journal 
+- systemd-journal members can read the journal message data files but not write to them
+- only systemd-journald daemon can write message data to the journals
+
+2. user
+- by default each user who logs in has journal message data collected and stored
+- users do not own their own journal message data files nor can they manually write data to them
+- can read their files
+
+Differences between rsyslogd and syslogd
+- provides structure and indexed log files (called journals) in a secure manner
+- harder for intruders to cover their tracks (modifying log files)
+- systemd- journal files are automatically rotated if they grow above certain limits
+    - reduces log file maintenance issues and complexity
+
+Configuring systemd-journald
+- /etc/systemd/journald.conf file
+- most options in this file are commented out by default
+
+Options
+__________
+Storage: determines where to store the journal data
+    - auto, persistent, volatile, and none
+    - default to auto
+        - stores the journal log data to /var/log/journal dir 
+    - persistent
+        - similar to auto
+        - creates the /var/log/journal dir if needed
+    - volatile - data is erased when the system shuts down
+        - /run/log/journal
+    - none
+        - not data is to be kept, any data received by the systemd-journald daemon is discarded
+
+Compress
+- reduce journal file space consumption via compression
+- uses xz compression
+
+Controlling Journal Data Filesystem Space Usage
+- 6 total options that control FS space usage
+- 3 options are prefixed by System and are used only for /var/log/journal data
+- 3 options are prefixed by Runtime and are used only for /run/log/journal data
+
+SystemMaxUse / RuntimeMaxUse
+- maximum FS space amount
+- stated as a percentage, defaults to 10%
+
+SystemKeepFree / RuntimeKeepFree
+- determine the minimum amount of FS space that must be available for other applications or users
+- stated as a percentage, defaults to 15%
+
+Rotating Journal Data Files
+- SystemMaxFileSize
+    - data file rotation is triggered by journal data file size
+    - by default the size of SystemMaxFileSize is set to 1/8 of the SystemMaxUse size setting
+    - can specify the size value in bytes or use unit suffixes (K,M,G,T, etc)
+- MaxFileSec
+    - determines the rotation schedule via time increment
+    - often set to 1 month - rotation occurs after the data is 1 month old
+    - various time settings are suffixed by time units (year, month, week, etc.)
+
+Sharing Journal Data
+- for backward compatibility you can set the journald daemon to share data w/ syslogd, rsyslogd, klogd daemons
+- ForwardToSyslog 
+    - forwards to syslogd or syslogd
+- ForwardToKMsg 
+    - forward to the kernel log buffer
+
+Viewing Journal Data
+- use journalctl utility
+- can add users who need access to system journal data to the systemd-journal group
+- run without any options, just `journalctl` to view all of the journal data entries
+- can add --no-pager to view without a pager
+
+-- Logs begin at Sun 2018-04-08 08:06:17 CDT, end at Sun 2018-04-08 08:21:45 CDT. --
+Apr 08 08:06:17 LinuxPlusX systemd-journald[246]: Runtime journal (/run/log/journal/) is 8.0M, max 79.7M, 71.7M free.
+Apr 08 08:06:17 LinuxPlusX kernel: random: get_random_bytes called from start_kernel+0x42/0x50d with crng_init=0
+Apr 08 08:06:17 LinuxPlusX kernel: Linux version 4.13.0-38-generic (buildd@lgw01-amd64-027) (gcc version 5.4.0 2016060
+Apr 08 08:06:17 LinuxPlusX kernel: Command line: BOOT_IMAGE=/boot/vmlinuz-4.13.0-38-generic.efi.signed root=UUID=ad0e0
+
+time stamps are real time adjusted for the system's time zone
+hostname is included
+next, the facility or client passing the message data to journald is listed
+finally, the message itself
+    
+journalctl [options...] [matches...]
+-a : display all data fields, including long fields and unprintable char
+-e : jump to the data file's end inside the pager utility
+-l : display all printable data fields fully
+-n number : show the most recent journal data and limit it to n number of lines
+    - by default show 10 if number is omitted
+-r : reverse the output of the journal data, newest data shown first
+
+matches
+`journalctl _TRANSPORT=kernel`
+`journalctl -n 6 _UID=0`
+
+user
+- fields passed directly from a client application and stored in the journal data
+
+trusted
+- trusted fields added only by the systemd-journald daemon
+
+kernel
+- kernel messages stored in the journal data
+
+fields logged on a different program's behalf
+- categoy name says it all
+
+categories:
+- note that options prefixed with _ are called trusted journal fields
+    - data was added by the systemd-journald daemon itself and was not altered by malicious users or programs 
+
+
+PRIORITY=value
+- compatible with syslogd priority settings
+- value param is set to 0 for emerg and 7 for debug
+
+_UID=user_id
+user_id is set to a particular user's UID to find journal data for a particular user
+
+_HOSTNAME=hostname
+- originating host
+
+_TRANSPORT=transport
+- journal data received from the transport param is displayed
+- can be set to
+    - driver
+    - syslog
+    - journal
+    - stdout
+    - kernel
+
+_UDEV_SYSNAME=device_name
+- displays journal data kernel messages for device_name
+- valid device_name settings show in the /sys/ directory
+
+OBJECT_PID=process_ID
+- journal message data related to a program with the PID of process_ID
+
+
+Maintaining the System Time
+- Linux maintains 2 clocks, hardware clock and software clock
+
+Manually Setting the Time
+- the main tool to set the software clock is date
+
+date [-u|--utc|--universal] [MMDDhhmm[[CC]YY] [.ss]]
+
+- used without any options displays the current date and time
+- use 24hr time format
+- Oct 26, 2016 3:02 PM
+    - 102715022016
+
+- hwclock utility lets you set the hardware clock from the software clock and vice versa
+- ordinarily will not be used directly very often
+
+hwclock [options]
+
+-r, --show: view the hardware clock, displayed in local time even if the hardware clock is set to UTC
+--set and --date=newdate: both options required
+    - newdate option is the date format that the date program accepts
+--systohc: if you've set the software clock you can synchronize the hardware clock to the same value
+--hctosys: if your hardware clock is accurate and the software clock is not you can use this option
+    - option is often used in a SysV startup script to set the system clock when the computer first boots
+--utc: treat the hardware clock as storing UTC
+--localtime: treat as holding local time
+    - default if whichever was last used when the hardware clock was set
+
+Using Network Time Protocol
+
+Understanding NTP Basics
+
+- stratum 0, 1, 2, 3 servers
+- slight time inaccuracy with each stratum # but only very, very slight
+- NTP works by measuring the round trip time for network packets between the server and client
+- the 2 systems exchange packets with embedded time stamps
+- the client then adjusts its time so that is is synchronized with the server
+    - time adjustment based on both the source's time stamp and the packet's estimated travel time
+    - for this reason always pick an NTP server with the shortest possible network time delay
+
+ntpd - NTP daemon
+- monitors for and adjusts the clock drift that's common in computer's clocks
+
+ntp.drift file 
+- usually stored in /var/lib/ntp
+- alternate: /etc
+- holds info about the software clock's inaccuracies
+
+Locating a Time Source
+
+- to locate an NTP server you should consult one or more of several sources
+
+Your ISP
+- most ISP including business networks and universities operate NTP servers for the benefit of their users
+- usually very close to your own (in a network sense)
+
+Your Distribution's NTP Server
+- some linux distros operate NTP servers for their users
+
+Public NTP Server Lists
+http://support.ntp.org/bin/view/Servers/WebHome
+- can be a good choice, you'll need to locate one closest to you in a network sense
+
+Public NTP Server Pool
+- pool.ntp.org subdomain is dedicated to servers that have volunteered to function as public NTP servers
+- use either pool.ntp.org or a numbered host within that domain - 0.pool.ntp.org
+- alternate: add a geographic name to the domain name
+    - north-america.pool.ntp.org
+
+- Closest server in a network sense may not be the closest computer in a geographic sense
+- a national ISP may route traffic through just 1 or 2 hub sites
+    - example: traffic from George to Florida may go through Chicago first
+    - increases round trip time and decrease the accuracy of NTP
+- can use ping to determine round trip time
+    - ping -c 3 0.us.pool.ntp.org
+    - ping -c 3 0.north-america.pool.ntp.org
+
+Configuring NTP Servers
+- most linux distros ship the NTP software in a package called ntp or ntpd
+- /etc/ntp.conf configuration file
+
+server 0.us.pool.ntp.org
+server 1.us.pool.ntp.org
+server 0.north-america.pool.ntp.org
+
+- server lines, each line points to an NTP server pool
+- when the local NTP daemon starts up it contacts all of the servers in /etc/ntp.conf
+    - measures their accuracy against each other
+    - settles on one as its primary time source
+    - typically there are 3 NTP servers listed
+        - enables your time server to weed out any source servers that deliver a bad time signal
+        - automatic fallback in case a source server becomes temporarily/permanently unavailable
+
+insane time: if any NTP client has a system time that varies 17 minutes or more from the NTP server's time
+    - then all NTP requests will be ignored
+- to elimate the chance of insane time you can do a manual time synchronization
+    - some distros have ntpdate command for this function (deprecated)
+    - other use netdate utility 
+    - recommended method:
+        - ntpd -gq command
+    - the ntp daemon will let you perform manual time sync in an insane time situation if you use -g
+        - also needed is the -q options, allows this one time operation to occur and returns you to the cmd prompt
+        - use -d for debugging mode
+        - the NTP daemon cannot be running when your issue ntpd -gq
+- for older sytems
+    - date
+    - ntpdate 0.us.pool.ntp.org
+    - date
+- once you setup your NTP configuration file and eliminate insane time you can start your NTP daemon, ntpd
+- with some distros the NTP service name has the same name 'ntp', others 'ntpd'
+
+ntpq - to help verify that NTP is working
+- either command line or interactive mode - interactive just type ntpq
+
+ntpq commands:
+peers, -p, --peers : obtain and print a list of the server's peers
+
+
+     remote           refid      st t when poll reach   delay   offset  jitter
+==============================================================================
+ 0.ubuntu.pool.n .POOL.          16 p    -   64    0    0.000    0.000   0.000
+ 1.ubuntu.pool.n .POOL.          16 p    -   64    0    0.000    0.000   0.000
+ 2.ubuntu.pool.n .POOL.          16 p    -   64    0    0.000    0.000   0.000
+ 3.ubuntu.pool.n .POOL.          16 p    -   64    0    0.000    0.000   0.000
+ ntp.ubuntu.com  .POOL.          16 p    -   64    0    0.000    0.000   0.000
++eterna.binary.n 128.138.141.172  2 u   90  128   17   46.427   19.182  42.782
+*gateway.dyn.im  216.218.254.202  2 u   10  128   37   80.829    4.843  47.925
+
+refid column: shows the server to which each system is synchronized
+st column: shows the stratum of the server
+*: the server to which your system is synchronized is denoted by an asterisk
++: indicates server with a good time
+- or x: denote servers that have been discarded from consideration for various reasons
+
+
+Configuring NTP Clients
+- once configuring one or more primary NTP servers you can configure the rest of your computers to point to them
+- set your NTP clients to refer to the NTP server you've just configured rather than an outside NTP source
+- may want to ensure that your NTP clients can't be accessed as servers as a security measure
+    - ntp.conf file > 'restrict default ignore' line
+        - tells the computer to ignore all incoming NTP requests
+- after configuring the client restart the NTP daemon   
+    - then use ntpq to check its status
+    - should only refer to your network's own NTP server/severs
+    - the stratum number should be 1 higher than the servers to which they refer
+
+
+Running Jobs in the Future
+- cron: program that runs cron jobs on a regular basis
+- at: related to cron, enables you to run a command on a one time basis at a specific point in the future
+
+cron
+- program is a daemon, runs continuously looking for events that cause it to spring into action
+- it "wakes up" once a minute, 
+    - examines the configuration files in /var/spool/cron and /etc/crond.d/ and the /etc/crontab file
+    - executes commands specified by these config files if the time matches the time listed in the files
+- cron jobs run unsupervised
+    - do not run an interactive rpgoram that requires user input
+
+- 2 types of cron jobs
+    - system cron jobs
+        - run as root and perform system wide maintenance tasks
+        - example: cron job to cleanout /tmp, perform log rotation, etc.
+    - user cron jobs
+        - created by ordinary users or as root
+
+#################################
+Creating System cron Jobs
+#################################
+- /etc/crontab file controls system cron jobs
+- file normally begins w/ several lines to set environment variables such as $PATH and $MAILTO
+
+→ cat /etc/crontab
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+# m h dom mon dow user  command
+17 *    * * *   root    cd / && run-parts --report /etc/cron.hourly
+25 6    * * *   root    test -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.daily )
+47 6    * * 7   root    test -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.weekly )
+52 6    1 * *   root    test -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.monthly )
+
+Five fields that specify the time to run the indicated job
+
+- The minute of the hour (0-59)
+- The hour of the day    (0-23)
+- The day of the month   (1-31)
+- The month of the year  (1-12)
+- The day of the week    (0-7)
+
+Day of the week: both 0 and 7 denote Sunday
+Month of the Year and Day of the Week: can use the 1st 3 letters of the name rather than the number
+Hour of the Day: listed in military time (24hrs)
+
+*            : matches all possible values
+0, 6, 12, 18 : list deliminated by commas matches any of the specified values
+9-17         : two values seperated by a dash denote a range, inclusive of the end points
+                example: 9-17 in the hour field specifies a time from 9:00 AM to 5:00 PM
+*/10         : a slash used in conjunction with other multi-value option specicfies stepped values
+                stepped value: a range in which some members are skipped
+                */10 in the minute field: indicates a job that is run every 10 mninutes
+              
+
+Next field: the account name to be used when executing the program
+
+Last field: command to be run and any included options or parameters
+
+*the run-parts command runs all executable programs with certain restrictions contained in the designatd dir
+    - 02 4 * * * root run-parts /etc/cron.daily
+    - in the above example: all executable programs in /etc/cron.daily at 4:02 AM every day 
+
+- the default /etc/crontab entries generally use run-parts, cronloop, or similar utility that runs any exe in a dir
+
+- many distros have these dir
+- /etc/cron.hourly
+- /etc/cron.daily
+- /etc/cron.weekly
+- /etc/cron.monthly
+    
+- can copy a script to these dir for it to run
+
+
+#################################
+Creating User Cron Jobs
+#################################
+- use the crontab utility
+- not to be confused with /etc/crontab
+
+crontab [-u user] [-l | -e | -r] [file]
+- if executed without user specified, use the current user
+
+options
+-l : display the current user crontab file
+-r : removes the current crontab file
+-e : opens an editor to edit current crontab file
+
+
+############
+Networking
+############
+A protocol stack is a set of software that converts and encapsulates data between layers of abstraction
+
+Client
+------
+Application
+Transport
+Internet
+Link
+
+Server
+------
+Application
+Transport
+Internet
+Link
+
+IP: Internet Protocol
+an internet layer (aka a network layer or layer 2) protocol
+best effort transport method
+packets not guaranteed to reach destination / out of order / corrupted
+portion of TCP/IP with which IP addresses are associated
+expressed as 4x base 10 numbers (0-255)
+
+IPv6
+update to IPv4 - 32 bit addresses
+128 bit addresses
+includes slaac, similar to DHCP used w/ IPv4
+SLAAC: stateless address auto configuration
+expressed as 8x groups of 4 digit hexadecimal numbers
+if 1 or more groups is 0000
+    that group/group(s) may be omitted leaving 2 colons
+    only 1 group of zeros can be compressed this way
+
+uses 2 types of network addresses
+- link local
+- global
+
+LINK LOCAL
+automatically assign a link local IPv6 address to all network interfaces
+to communicate on the local networks
+    - fe80:0000:0000:0000: de facto standard
+linux creates a link local IPv6 network address using this network address along
+with a combination of the MAC address
+    - ensures system will have a unique IPv6 address
+    - can communicate without any configuration
+- non routable
+    - can only be used for local network connectivity
+
+SITE LOCAL ADDRESSES
+- may be routed within a site but not offsite
+- begin with the hexadecimal number
+    - fec
+    - fed
+    - fee
+    - fef
+
+GLOBAL
+utilizes a network address advertised by a router onto the internet
+- can statically assign an IPv6 global address
+- or can use a DHCPv6 server to assign IPv6 global addresses automatically on the network
+
+ICMP: Internet Control Message Protocol
+most often used to send error messages between computers
+    - often done by modifying an IP packet and returning to its sender
+    - technically an internet layer protocol, relies upon IP
+ping!
+
+UDP: User Datagram Protocol
+- simplest of the common transport layer (aka layer 3) TCP/IP protocols
+- does not provide procedures to correct for
+    - out of order packets
+    - guarantee delivery
+    - improve limitations of IP
+- DNS, NFS, streaming media protocols
+- it's faster
+
+TCP: Transmission Control Protocol
+- most widely used
+- creates full connections w/ error checking and correction + other features
+    - small performance penalty
+- SMTP, HTTP, FTP
+
+Understanding Network Addressing
+
+MAC: Media Access Control (MAC) addresses - hardware address
+6 bytes in length
+expressed in hexadecimal (base 16)
+
+ARP: Address Resolution Protocol for IPv4
+NDP: Neighbor Discovery Protocol for IPv6
+
+enables a computer to send a broadcast query - goes to all computers on the network
+asks computer to identify itself
+includes the hardware address
+
+CIDR: Classless Inter-Domain Routing 
+172.30.9.102/16 > 172.30.9.102 w/ a netmask of 255.255.0.0
+
+NAT: Network Address Translation
+
+Broadcasting Data
+- sent to all computers on a local network
+- under TCP/IP, a broadcast is done by specifying binary 1 values in all of the machine bits of the IP address
+
+IP address 172.30.9.102
+netmask    255.255.0.0
+final 2 elements of netmask have 0 values
+    - swap in 255 values to obtain a broadcast address of 172.30.255.255
+
+IP address 172.30.9.102
+netmask    255.255.128.0
+cidr       172.30.0.0/17
+- calculates to 172.30.127.255
+
+binary
+IP ADDR: 10101100    00011110    00001001    01100110
+NETMASK: 11111111    11111111    10000000    00000000
+BROAD :  10101100    00011110    01111111    11111111
+
+to create broadcast address:
+    set top (network address) values to 1 when the bottom (netmask) value is 0
+
+Understanding Hostnames
+link names for computers to IP addresses
+composed of 2x parts
+    - machine names (specific computer)
+    - domain names (collection of computers)
+
+TLD: top level domains
+    - .com, .edu, .uk
+reserved fictitious domains:
+.example
+.invalid
+.localhost
+
+reserved (2nd level) domains:
+.example.com
+.example.net
+.example.org
+
+Resolving Hostnames
+DNS: Domain Name System
+
+nslookup
+-performs DNS lookups
+-officially deprecated
+
+host
+- serves as a replacement for nslookup
+
+dig
+- performs more complex DNS lookups than host
+- can use to find the IP address for a single hostname or a hostname for a single IP address
+- more flexible than host
+
+whois
+- look up information on a domain as a whole
+- reveals who owns domain, contact info, etc
+
+/etc/hosts file
+file holds mappings of IP addresses to hostnames
+
+                # full hostname including domain    # alias
+127.0.0.1       localhost
+192.168.7.23    apollo.luna.edu                     apollo
+
+Linux normally performs lookups in /etc/hosts before using DNS
+
+/etc/nsswitch.conf
+Configures the Name Service Switch (NSS) service
+
+modify lookup behavior with the 'hosts' line
+hosts:  files   dns
+# Reverse the order of 'files' and 'dns' options to have the system consult DNS before /etc/hosts
+
+- supports many options
+    - perform name resolution using Windows NetBIOS calls or LDAP by adding options to hosts line
+
+/etc/networks
+- works much like /etc/hosts but it applies to network addresses
+    - and reverses the order of the names and IP address on each line
+
+loopback 127.0.0.0
+# loopback name to the 127.0.0.0/8 network
+mynet 192.168.7.0
+# mynet name to the 192.168.7.0/24 network
+
+privileged and unprivileged ports
+< 1024 = privileged - unix / linux restricts access to root
+> 1024 = unprivileged - may be accessed by ordinary users
+
+/etc/services
+maps port numbers to names
+begin w/ a name and end w/ a port number
+
+ssh     22/tcp      # SSH remote login protocol
+ssh     22/udp      # SSH remote login protocol
+telnet  23/tcp
+smtp    25/tcp
+
+Configuring Linux for a local network
+DHCP clients
+1. pump
+2. dhclient
+3. dhcpcd
+
+# RHEL and Fedora
+/etc/sysconfig/network/routes
+
+/etc/sysconfig/network-scripts/ifcfg-name
+BOOTPROTO="dhcp"
+
+"""
+DEVICE="en0"
+BOOTPROTO="static"
+IPADDR="192.168.10.1"
+NETMASK="255.255.255.0"
+NETWORK="192.16t8.10.0"
+BROADCAST="192.168.10.255"
+GATEWAY="192.168.10.1"
+ONBOOT="yes"
+"""
+
+# Ubuntu
+/etc/network/interfaces
+iface eth0 inet dhcp
+
+`dhclient eth0` run DHCP client manually
+
+/etc/resolv.conf
+Precede the IP address of the DNS server by the keyword nameserver
+nameserver      127.0.0.53
+
+ifconfig interface up addr network mask
+# IPv4
+ifconfig eth0 up 192.168.29.39 netmask 255.255.255.0
+# IPv6
+ifconfig eth0 up inet6 add 4201:00e4::23db:1fda:002a/10
+
+route add default gw 192.168.29.1
+
+jteumer@lab1:~$ route
+Kernel IP routing table
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+default         _gateway        0.0.0.0         UG    100    0        0 enp0s3
+10.0.2.0        0.0.0.0         255.255.255.0   U     0      0        0 enp0s3
+_gateway        0.0.0.0         255.255.255.255 UH    100    0        0 enp0s3
+
+route -n
+causes route to not attempt to find hostanems associated with IP addresses
+this lookup can be slow or fail if the DNS config is broken
+
+route {add | del} [-net | -host] target [netmask nm] [gw gw] [reject] [[dev] interface]
+
+# a network in which packets destined for the 172.20.0.0/16 subnet 
+should be passed through the 172.21.1.1 router
+route add -net 172.20.0.0 netmask 255.255.0.0 gw 172.21.1.1
+
+By default a Linux system will not forward packets it receives from one system
+that are directed to another system
+
+To accept these packets and send them on to the destination network
+# Temp
+# echo "1" > /proc/sys/net/ipv4/ip_forward
+
+# Permanent
+# Ubuntu
+/etc/sysctl.conf:
+net.ipv4.ip_forward = 1
+
+# RHEL
+/etc/sysconfig/sysctl:
+IP_FORWARD
+
+ifup and ifdown commands: todo :)
+
+
+
+
+
+
+
+
+
+

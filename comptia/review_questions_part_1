@@ -1,0 +1,159 @@
+ONE
+1. D
+2. E
+3. E
+4. A
+5. A
+6. E
+7. C
+8. C
+9. E
+10. B
+11. C
+12. A
+13. C
+14. A
+15. B, C, D
+16. E > D
+Program cannot handle data separated by tabs
+data is separated by a tab stop at every eight characters
+How to process the data file?
+D: expand data.txt > data1.txt
+E: unxepand does the opposite
+expand : convert tabs to spaces
+unexpand : convert spaces to tabs
+
+Need to look at expand / unexpand again
+17. C
+18. B
+19. A
+20. C
+
+TWO
+1. D
+2. A
+3. E
+4. E > B
+The -i operation installs software
+Option E describes a package upgrade with is handled with -U and not -i
+5. C > A
+A : rpm2cpio myfonts.rpm | cpio -i --make-directories will extract the contents of the rpm into the current dir
+Option C will uninstall the package called myfonts.rpm (but not the myfonts package)
+6. E
+7. C
+8. B > E
+dpkg --get-selections action to dpkg displays the names of all installed packages
+Option B apt-get showpkg displays information about a named package
+9. D
+10. A, B
+11. E > B
+How to configure an additional Yum software repository?
+B: Download a package from the repository site and install it with RPM or place a configuration file from the repository site in the /etc/yum.repos.d directory
+Option E the /etc/yum.conf file doesn't store repo data
+12. B
+13. D
+14. D
+15. C, D
+16. A
+17. A
+18. E
+19. B, E > C, E
+nice -10 crunch == nice crunch
+Option B sets the priority to -10 rather than 10
+nice -n, --adjustment=N
+	add integer N to the niceness (default 10)
+20. D, E
+
+THREE
+1. Don't know
+B, C #3,4
+2. A
+3. E
+4. E
+5. B, C, D > A, C, D
+/proc/ioaddresses does not exist
+A: /proc/ioports
+6. B
+7. D > E
+/etc/fstab comtains the mappings of partitions to mount points
+so can't have /etc/ on a seperate partition - won't be mounted you silly goose
+8. D
+9. A
+10. C
+11. E
+12. B
+13. B > E
+Swap isn't mounted
+14. E > C
+-t fstype
+-f doesn't exist
+15. A
+16. D
+17. E
+18. B
+19. A, B, C
+20. A
+
+FOUR
+1. B
+2. A, D
+3. A
+4. D
+5. A, B
+6. D, E
+7. E
+8. A
+9. E
+10. C, E
+11. C
+12. E
+13. D Files start with 666 permission bit, umask: remove perm bits but not add
+027: removes group write perm and all world perm
+14. E
+15. D > B
+reqquota utility is used to summarize quota information about the FS
+quotacheck utility checks quota information about a disk and writes corrections
+16. D
+17. A
+18. C
+19. B
+20. D
+which: searches the path, prints the path to the first executable file
+
+FIVE
+1. C
+2. C
+3. D
+4. B
+5. C => D
+C: possible name for the Grub legacy configuration file
+D: correct answer, /boot/grub/grub.cfg
+
+6. B => A
+initrd $space $path
+initrd /boot/initrd-3.4.2
+B: uses an = sign, initrd= syntax error
+
+7. D
+8. A => B
+A:  you pass the Linux root partition to the kernel on the kernel line, not via GRUB root keyword
+root keyword ina GRUB legacy config file tells the boot loader where to look for files
+B: legacy numbers from 0
+(hd1,5) refers to the 2nd disk and 6th partition
+
+9. B
+10. A, B, E
+11. A, D => B, C
+The 1st number is the previous runlevel
+The 2nd number is the current runlevel
+
+12. A
+13. B
+14. B
+15. A
+16. A
+17. D
+18. E
+19. A, B, C
+20. B
+

@@ -1,0 +1,247 @@
+#-##-##-##-##-##-##-#
+ONE
+#-##-##-##-##-##-##-#
+1. D
+2. E
+3. E
+4. A
+5. A
+6. E
+7. C
+8. C
+9. E
+10. B
+11. C
+12. A
+13. C
+14. A
+15. B, C, D
+16. D
+17. C
+18. B
+19. A
+20. C
+
+#-##-##-##-##-##-##-#
+TWO
+#-##-##-##-##-##-##-#
+1. D
+2. A
+3. E
+4. B
+5. A
+6. E
+7. C
+8. E
+9. D
+10. A, B
+11. B
+12. B
+13. D
+14. D
+15. C, D
+16. A
+17. A
+18. E
+19. C, E
+nice command launches a program with increased or decreased priority
+default priority: 10
+nice -10 program: also sets the priority to 10
+
+A: not valid
+B: sets the priority to -10
+D: not valid
+
+20.  D, E
+Only root may modify the priority of other users' processes
+Only root may increase the priority of a process
+
+#-##-##-##-##-##-##-#
+THREE
+#-##-##-##-##-##-##-#
+1. B, C
+IRQ     Notes
+3,4     RS-232 serial ports
+1       Keyboard
+8       Real-time clock
+16      non standardized
+
+2. E > A
+Modern firmware (BIOSs and EFIs) provides the means to disable many onboard devices including sound hardware
+
+3. E
+4. E
+5. A, C, D
+/proc/ioports     : holds information about I/O ports
+/proc/ioaddresses : does not exist
+/proc/dma         : direct memory access channels
+/proc/interrupts  : lists the IRQs currently in use
+/proc/hardware    : does not exist
+6. B
+Logical partitions (numbered 5^) reside in an extended partition (numbered 1-4)
+
+7. E
+/etc must be an ordinary dir on the root partition (for /etc/fstab to work correctly)
+
+8. D
+9. A
+0x0f: one of 2 common partition type codes for an extended partition (other is 0x05)
+0x82: Linux swap
+0x83: Linux
+
+10. C
+11. E
+12. B
+13. E
+14. C
+15. A
+16. D
+17. E
+18. B I guessed between A, B
+# <file system> <mount point>   <type>  <options>       <dump>  <pass>
+UUID=0f5a6621-36a8-4596-9d50-46026403fff1 /               ext4    errors=remount-ro 0       1
+
+19. A, B, C I guessed
+user, users, and owner all enable oridinary users to mount a FS
+user: enables anybody to mount a FS and only that user may unmount it
+users: enables anybody to mount a FS and anybody may unmount it
+owner: enables only the owner of the mount point to mount or unmount a FS
+
+owners: does not exist
+uid=1000: tells Linux to set the ownership of files to UID 1000 on FS that lack Linux permissions
+
+20. A
+
+
+#-##-##-##-##-##-##-#
+FOUR
+#-##-##-##-##-##-##-#
+1. B
+touch updates a file's time stamps
+2. A, D
+soft links with -s and --symbolic
+3. A
+-l long list, -a all
+4. D
+5. A, B
+mkdir --parents: create a dir inside a dir that doesn't exist
+6. D, E
+7. E
+tar
+--list (t) used to read the archive and display its contents
+--verbose (v) creates a verbose file listing
+--file (f) specifies the filename
+8. A
+hard links are restricted to a single FS
+9. E
+10. C, E
+11. C
+set uer ID (SUID) bit enables programs to run as the program's owner rather than as the user who ran them
+12. E
+chmod o+r adds read to the world (o)
+13. D : umask permission bits are removed
+
+Files start with 666
+666 (sub)
+027
+---
+640
+
+640
+umask value to get rw-,r--,---
+
+14. E guess
+using quotas requires kernel support
+usrquota or grpquota (for user or group quotas) FS mount option
+quotaon : command for activating quotas
+
+
+15. D guess > B
+
+repquota: utility is used to summarize the quota information about the FS
+-a: shows info for all FS
+
+quotacheck: utility checks quota info about a disk and writes corrections
+
+
+16. D
+17. A
+
+whereis: searches a limited set of dir
+type: searches shell's path and built-in commands
+which: searchs the path just as bash does, but it prints the path to the first executable program it finds in the path
+
+18. C
+19. B
+20. D
+
+#-##-##-##-##-##-##-#
+FIVE
+#-##-##-##-##-##-##-#
+1. C
+2. C
+single user mode kernel option
+3. D
+4. B
+5. D guess
+
+GRUB 2 config file
+A: does not exist
+B: not the location of the config file
+C, D: possible names for the GRUB legacy config file
+likely meant E here^ instead of D
+
+
+6. C guess > A
+
+initrd keyword identifies an initial RAM disk file in the GRUB 2 config file
+a space ' ' separates this keyword from the filename (several variants on this syntax are possible)
+
+B: syn incorrect
+C,D,E: use incorrect initramfs and ramdisk keywords
+
+7. D
+8. C guess > B
+
+root (hd1,5) => 2nd HDD, 6th partition
+/boot/grub/menu.lst
+
+root keyword in a GRUB legacy config file tells the boot loader where to look for files
+    - including its own config files, kernel files, and so on
+
+GRUB legacy numbers both hard disks and partitions starting from 0
+A: pass linux root partition to the kernel on the kernel line, NOT via GRUB root keyword
+
+9. B
+
+/etc/inittab
+id:5:initdefault:
+
+10.  A, B, E
+
+shutdown/halt: 0
+singe-user mode: 1
+reboot: 6
+default runlevel on Debian and derivatives: 2
+regular, user configurable runlevel: 5
+
+11. B, C
+
+runlevel
+5 3
+
+5: previous
+3: current
+N: indicates that the system hasn't changed runlevels since booting
+
+12. A
+shutdown -c: cancel
+
+13. B
+14. B
+15. A
+16. A
+17. D
+18. E
+19. A, B, C
+20. B

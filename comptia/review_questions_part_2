@@ -1,0 +1,79 @@
+Review Questions Part II
+
+1. A
+
+2. D
+config file design enables you to define variants or multiple components and easily combine/recombine
+A, B, C are fictitious structures
+E: config file uses a text mode structure, not binary
+
+3. C
+vertical refresh range includes a max value
+value may be reduced when the resolution and vertical refresh rate would demand a higher horizontal refresh rate than the monitor can handle
+
+4. E
+A: ServerLayout section combines all of the other options together but does not set the resolution
+B: Modeline option in the Monitor section defines one possible resolution
+    - may be several Modeline entries defining many resolutions
+C: Modeline option in the Device section does not exist
+D: There is not DefaultResolution section
+
+5. B
+- reduce admin cost of maintaining fonts on all systems
+
+6. C, E
+system startup script or by init (as specified in /etc/inittab)
+A: Start folder is for Windows
+B: ~/.xinitrc script is an X login script used when starting X from the cmd line via startx
+    - not sued to start X automatically when the system boots
+D: boot manager launches the kernel, does not directly start X
+
+7. E guess
+A: XDM does not offer many options on its main screen
+B: Kernel does not directly handle the login process not does it pass options directly to XDM
+C: xorg.conf file is real, however, this file provides no XDM config options because XDM is a seperate program from X
+D: no standard xdmconfig program
+
+8. C
+9. A
+10. A
+- GNOME, KDE, and other user programs often override the keyboard repeat settings in the X config file
+B: most Linux distros have abandoned XF86Config
+C: pure fiction
+
+11. C, E
+
+12. B, C - INCORRECT B, E
+- time zones are determined by the /etc/localtime file
+    - replacing the file with a file from /usr/share/zoneinfo is correct
+- may also need to edit /etc/timezone
+E: tzselect will make these changes for you after prompting you for your location
+
+A: hwclock program reads/writes data from the system's hardware clock
+    - it relies on the time zone data but can't adjust the time zone itself
+C: no standard /etc/tzconfig file, although the tzconfig program, like tzselect, can help set the time zone
+D: /etc/localtime is in a binary format so don't edit with a text editor
+
+13. D
+- Linux maintains its time internally in UTC
+
+14. C
+- when set, the LC_ALL env variable adjusts all the locale (LC_*) variables
+A: BIOS has no location code data
+B: no standard /etc/locale.conf file
+D: no standard locale_set utility
+E: setting the time zone has no effect on text formatting options
+
+15. A
+
+16. E
+can accept different file types (plain txt, PostScript, graphics, etc.) and print them correctly
+
+17. B, D
+
+18. C
+
+19. B
+
+20. B
+

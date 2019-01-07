@@ -1,0 +1,2648 @@
+Part I
+
+Exam LX0-103
+
+History
+`history`
+!index to call history
+example !13
+
+STDIN STDOUT
+
+0  - stdin
+>  - stdout to new file
+1> - stdout to new file
+2> - stderr to new file
+&> - both stdout, stderr to new file
+<> - file to be used for both stdin and stdout
+
+# The syntax to redirect a stream to another file descriptor
+>& 
+
+echo "This messages goes to sderr" >&2
+
+# Both of these commands do the same thing
+./messagetest &> /dev/null
+./messagetest > /dev/null 2>&1
+# Above redirects STDERR to STDOUT which is then discarded since STDOUT has already been redirected
+
+CUT
+
+cat file | cut -c 2,3
+prints the 2nd and 3rd character of the file
+Hello, World > el
+
+SPLIT
+split -b 5 file
+^ separate a file into multiple files of 5 bytes each
+
+split -l 2 file
+^ separate a file into multiple file of 2 lines each
+
+UNIQUE
+report or omit repeated lines
+-d : show only duplicate lines
+
+TR
+translate or delete characters
+
+command to change any character from A-Z into lower case a-z from a stream
+tr A-Z a-z
+
+command to delete all of a specific set of char from a stream
+tr -d [set1]
+
+command to replace duplicates of the defined set with only one instance
+tr -s [set1] (squish)
+
+TYPE
+indicate how each name would be interpreted if used as a command name
+-t : alias, keyword, function, builtin
+-a : all
+
+FMT
+- simple optimal text formatter
+- the program attempts to clean up paragraphs, assumes delimited by 2 or more blank lines or by changes in indentation
+- new paragraph formatting defaults to paragraphs no more than 75 char wide
+
+NL
+- number lines of files
+nl -b a file for all lines including empty
+
+PR
+- convert text files for printing
+- by default creates output that includes the original text w/ headers which lists the current date and time, original filename, and the page number
+pr -d : command to print a document double spaced
+
+OD (octal dump)
+- dump files in octal and other formats
+-c : for character representation
+
+EXPAND
+- convert tabs to spaces
+
+UNEXPAND
+- convert spaces to tabs
+
+To install or upgrade a package
+rpm -Uvh samba*.rpm
+
+To verify that the package is installed
+rpm -qi samba
+
+rpm file are actually modified cpio archives
+to convert:
+rpm2cpio samba*.rpm > samba.cpio
+
+extract the data using cpio which takes 
+-i option to extract
+--make-directories to create directories
+
+rpm2cpio samba.rpm | cpio -i --make-directories
+
+Display information about the package
+rpm -qpi zsh.rpm
+-q query
+-p package
+-i info
+
+Install
+rpm -ivh zsh.rpm
+-i install
+-v verbose
+-h hash
+
+Verifies that the package is installed
+rpm -q zsh
+
+Verify
+checks the package files against the data stored in the database
+rpm -V zsh
+
+Uninstall
+rpm -e zsh
+removes the package
+
+
+dpkg = package manager for Debian
+
+PRIMARY ACTIONS
+
+-i --install installs a package
+--configure reconfigures an installed package: runs the post-installation script to set site specific options
+
+-r --remove removes a package but leaves configuration files intact
+
+-P --purge removes a package, including configuration files
+
+--get-selections displays currently installed packages
+
+-p --print-avail displays information about an installed package
+
+-I --info displays information about an uninstalled package file
+
+-l pattern --list pattern: list all packages whose names match pattern
+
+-L --listfiles: lists the installed files associated with a package
+
+-S pattern --search pattern: locates the package(s) that own the file(s) specified by pattern
+
+-C --audit: searches for partially installed packages and suggests what to do with them
+
+OPTIONS
+
+syntax below
+flag:used with
+
+--root=dir: all
+modifies the Linux system using a root directory located at dir
+can be used maintain one Linux installation discrete from another one, say during OS installation or emergency maintenance
+
+-B --auto-deconfigure: -r
+disables packages that rely on one that is being removed
+
+--force-things: assorted
+overrides defaults that would ordinarily cause dpkg to abort
+consult man dpkg for details (specified by things)
+
+--ignore-depends=package: -i, -r
+ignores dependency information for the specified package
+
+--no-act: -i, -r
+checks for dependencies, conflicts, and other problems without actually installing or removing the package
+
+--recursive: -i
+installs all packages that match the package-name wildcard in the specified directory and all subdirectories
+
+-G: -i
+does not install the package if a newer version of the same package is already installed
+
+-E or --skip-same-version: -i
+does not install the package if the same version of the package is already installed
+
+DPKG-RECONFIGURE
+reconfigures the package, asking the package's initial installation questions and restarting daemons
+
+
+APT CACHE
+apt-cache intended soley to provide information about the debian package database (package cache)
+
+showpkg subcommand: apt-cache showpkg samba displays information about a package
+
+apt-cache stats: learn how many packages are installed, how many dependencies are recorded, and various other statistics
+
+apt-cache depends: shows all of the specified package's dependencies
+apt-cache rdepends: finds reverse dependencies - packages that depend on the one you specify
+
+apt-cache pkgnames: displays the names of all the packages installed on the system
+
+APT GET
+Debian's equivalent to YUM
+/etc/apt/sources.list: specifies locations from which important packages can be obtained
+
+syntax below
+flag:used with
+
+OPTIONS
+
+-d --download-only: upgrade, dselect-=upgrade, install, source
+download package files but does not install them
+location: /var/cache/apt/archives
+
+-f --fix-broken: install, remove
+attempts to fix a system on which dependencies are unsatisfied
+
+-m --ignore-missing or --fix-missing: upgrade, dselect-upgrade, install, remove, source
+ignores all package files that cannot be retrieved (because of network errors, missing files, or the like)
+
+-q --quiet: all
+omits some progress indicator information, may be doubled (for instance -qq) to produce still less progress information
+
+-s --simulate, --just-print, --dry-run, --recon, --no-act: all
+performs a simulation of the action without actually modifying, installing, or removing files
+
+-y, --yes, --assume-yes: all
+produces a 'yes' response' to any yes/no prompts in installation scripts
+
+-b, --compile, --build: source
+compiles a package after retrieving it
+
+--no-upgrade: install
+causes apt-get to not upgrade a package if an older version is already installed
+
+COMMANDS
+
+update: obtains updated information about packages available from the installation sources listed in /etc/apt/sources.list
+
+upgrade: upgrades all packages to the newest versions available, based on locally stored information about available packages
+
+dselect-upgrade: performs any changes in package status (installation, removal, and so on) left undone after running dselect
+
+dist-upgrade: similar to upgrade but performs 'smart' conflict resolution to avoid upgrading a package if doing so would break a dependency 
+
+install: installs a package by package name (not by package filename) obtaining the package from the source that contains the most up to date version
+
+remove: removes a specified package by package name
+
+source: retrieves the newest available source package file by package filename using information about available packages and installation archives listed in /etc/apt/sources.list
+
+check: checks the package database for consistency and broken package installations
+
+clean: performs housekeeping to help clear out information about retrieved files from the Debian package database. If you don't use dselect for package management, run this from time to time in order to save disk space
+
+autoclean: similar to clean, but removes information only about packages that can no longer be donwloaded
+
+download: will download the package to the current directory - does not require sudo
+
+DSELECT
+
+dselect is a high level package browser
+you can select packages to install on your system from the APT archives (/etc/apt/sources.list)
+review packages already installed, uninstall, and upgrade
+
+APTITUDE
+
+another text based debian package manager
+
+Update Package Lists
+aptitude update
+
+aptitude install
+
+aptitude full-upgrade
+aptitude safe-upgrade
+both upgrade all install packages
+safe upgrade is conservative about removing packages or installing new ones
+
+aptitude search
+
+aptitude autoclean
+removes already downloaded packages that are no longer available
+clean removes all downloaded packages
+
+aptitude help
+results in a complete list of options
+
+SYNAPTIC
+
+GUI X-based program
+
+ALIEN
+
+--to-rpm
+--to-deb
+--to-slp
+--to-tgz
+--install
+
+Package Installation Errors
+
+Force the installation: 
+
+Ignore failed dependencies:
+rpm -i package.rpm --nodeps
+
+Force anyways
+rpm -i package.rpm --force
+
+dpkg --ignore-depends=package, --force-depends, and --force-conflicts
+
+Rebuild the package: rpmbuild --rebuild package.rpm
+
+LIBRARY
+
+.so shared object / dynamic libraries
+.a static library
+
+Shared libraries: main program omits most of the library routines and instead includes references to shared library files
+
+Devs who create programs using odd, outdated, or otherwise exotic libraries sometimes use static libraries
+
+Binary program files can point to a library by name alone (libc.so.6) or a complete path (/lib/libc.so.6)
+
+Setting the path system wide:
+edit /etc/ld.so.conf
+lines such as:
+include /etc/ld.so.conf.d/*.conf
+after editing you must use `ldconfig` to have your programs use the new path
+
+Trusted libary directories (these dir are always in the library path, even if not listed in ld.so.conf):
+/lib
+/usr/lib
+
+Temporary Changing Path:
+set LD_LIBRARY_PATH evironment variable
+Example:
+export LD_LIBRARY_PATH=/usr/local/testlib:/opt/newlib
+add 2 new dir: /usr/local/testlib and /opt/newlib
+These directories are added to the start of the search path - takes precedence over other dir
+Additionally, does not require ldconfig to run to take effect
+
+Correcting problems:
+1) install missing libraries
+2) if library is installed, add the dir globally or with LD_LIBRARY_PATH
+3) create symbolic link from the locatation of the library to the location the program expects
+
+Library Management Commands
+ldd: displays a program's shared library dependencies (shared libraries that a program uses)
+ldconfig: updates caches and links used by the system for locating libraries
+
+ldd `which smartctl`
+each line begins with a library name => complete library path
+
+Rebuilding the Library
+ldconfig 
+-v verbose
+-N do not update the library cache, will still update symbolic links to libraries
+-n process only specified directories on the cmd line
+-X opposite of -N, updates cache but not manage links
+-f conffile : use a new configuration file, change from /etc/ld.so.conf
+-C cachefile : use a new cache file
+-r dir : treat dir as if it were the root dir (/)
+helpful when recovering a badly corrupted system or installing a new OS
+-p display current information from the current cache
+
+MANAGING PROCESSES
+
+UNAME
+-n --nodename : displays the system's node name (network hostname)
+-s --kernel-name : displays the kernel name which is Linux on a Linux system
+-v --kernel-version : displays the kernel build date and time, not an actual version number
+-r --kernel-release : displays the actual kernel version number
+-m --machine : displays information about your machine, likely a CPU code such as i686 / x86_64
+-p --processor : displays information about the CPU (manufacturer, model, clock speed)
+in practice it returns 'unknown' on many systems
+-i --hardware-platform : hardware platform, option often returns unknown
+-o --operating system : displays the OS name, normally GNU/Linux for a Linux system
+-a --all : displays all available information
+
+PS : report a snapshot of the current processes (processes' status)
+
+Unix98 Options
+single char options may be grouped together and are proceeded by a single dash (-)
+
+BSD Options
+single char options may be grouped together and and must no be proceeded by a dash
+
+GNU Long Options
+multi-char options are never grouped together - proceeded by 2 dashes (--)
+
+FEATURES
+Display All Processes
+by default only processes that were run from its own terminal (xterm, text-mode login, remote login)
+-A and -e : display all of the processes on the system
+-x : display processes owned by the user who gives the command, also increases the amt of info that is displayed about each process
+-u user U user --User : display processes owned by a given user, user variable will be username or use ID
+-f, -l, j, l, u, v : expand information provided in ps output
+-H, -f, --forest : group processes and use indentation to show hierarchy of relationships between processes
+-w, w : normally ps truncates output to 80 col, this will not truncate (wide lines)
+
+PS HEADINGS
+USERNAME
+name of the user who runs the programs
+
+PROCESS ID
+number associated with the process
+
+PARENT PROCESS ID
+identifies the process's parent
+
+TTY
+teletype is a code used to identify a terminal
+not all processes have TTY numbers (X programs and daemons)
+text mode programs do which point to a console, xterm, or remote login session
+
+CPU TIME
+(TIME and %CPU)
+TIME: total amount of CPU time consumed
+%CPU: percentage of CPU time the processed consumed when ps executes
+Both can help spot runaway processes - those that are consuming too much CPU time
+
+CPU PRIORITY
+NI column lists priority codes
+Default value is 0
+Positive values indicate reduced priority
+Negative values indicate increased priority
+
+MEMORY USE
+RSS : resent set size (memory used by the program and its data)
+%MEM% : percentage of memory the program is using
+SHARE : memory that's shared with other processes (such as shared libraries)
+
+COMMAND
+final column is the command used to launch the process
+
+find
+ps ax | grep bash
+
+see all processes with a tree
+ps -A --forest
+
+TOP
+Display Linux processes
+
+TOP OPTIONS
+-d delay : deplay between updates
+
+-p pid : monitor specifc processes, up to 20 PIDs, comma delimited
+
+-n iter : display a certain number of updates and then quit
+
+-b batch mode : doesn't use the normal screen update commands
+might use this to log CPU use of targetd programs to a file
+
+When running options are available
+b and ? : display help information
+
+k : kill a process
+
+q : quit
+
+r : change a process priority, enter the PID and a new priority value
+positive : decrease in priority
+negative : increase in priority
+default value of 0
+only root can increase the priority
+`renice` is another command accomplish this
+
+s : changes the display;s update rate
+
+P : sets the display to sort by CPU usage ( default )
+
+M : sets the display to sort by memory usage
+also use `free` to look at memory usage
+
+LOAD AVERAGE
+One of the pieces of information provided by top is the load average : a measure of the demand for CPU time by applications (located at the top of top - heh see what I did there?)
+
+Example:
+`uptime` also shows the load average
+load average: 0.79, 0.19, 0.08
+3 load average estimates : current load average and two previous measures
+
+a system with 0.0 has no programs demanding CPU time
+
+a system with 1.0 has one program running CPU intensive tasks
+
+higher load averages reflect programs competing for CPU time
+
+most computers today have multiple CPUs or CPU cores
+the load average can == the number of CPUs or cores before competition for CPU time begins
+example: quad core CPU can have a load average of 4.0 before contention occurs
+typically 1 program can create a load of just 1.0, however, multithreaded programs can create higher load averages
+
+JOBS
+
+Displays minimal information about the processes associated with the current session
+1 - provided job ID numbers starting with 1...2...3
+2 - ensure all programs have terminated prior to logging out
+
+PGREP
+
+Perform simple searches within the process list (similar to piping the ps command output to grep)
+You can search for processes by username, user ID, or group ID as well as regular expressions
+
+pgrep -u root cron
+812
+
+pgrep -u jteumer sshd
+1537
+
+BACKGROUND and FOREGROUND PROCESSES
+CTRL + Z : pause the program and gives you control of the terminal (note it suspends the program!)
+
+fg : fg # restores the program to the foreground, example fg 2 (without a number uses last program)
+
+bg : restores a job to running status, but in the background
+
+& : append to a command to run in the background
+
+MANAGING PROCESS PRIORITIES
+
+nice : launch a program with specified priority
+renice : alter the priority of a running program
+
+nice : 
+nice [argument] [command [command-arguments]]
+1 - specify the priority proceeded by a dash
+2 - specify the priority after the -n parameter
+3 - specify the priority after the --adjustment= parameter
+nice -12 number-crunch data.txt
+nice -n 12 number-crunch data.txt
+nice --adjustment=12 number-crunch data.txt
+by default nice uses 10 if a priority number was not provided
+range of possible values : -20 to 19
+by default a program run without nice is 0
+
+renice : you must specify a priority
+renice priority [[-p] pids] [[-g] pgrps] [[-u] users]
+if you've given a numeric value with a -p, -g, or -u option renice assumes the value is a PID
+example: renice 7 16580 -u pdavidson tbaker
+sets the priority to 7 for PID 16580 and for all processes owned by pdavidson and tbaker
+
+KILLING PROCESSES
+
+kill : program sends a signal (a method Linux uses to communicate with processes) to a process
+signal is usually sent by the kernel, user, or the program itself
+kill will only kill processes owned by that user, the exception is root
+supports numbered signals, each of which is associated with a specifc name
+kill -l : see all available signals
+
+kill -s signal pid
+
+common
+1 : SIGHUP : terminates interactive programs and causes many daemons to reread their configuration files
+9 : SIGKILL : causes the program to exit without performing routine shutdown tasks
+15 : SIGTERM : causes the program to exit but allows it to close open files and so on
+
+KILLALL
+killall [options] [--] name [...]
+Kills a process based on its name rather than its PID number
+killall fio
+the default is 15 ( same as kill )
+-i : interactive : prompts for confirmation before sending the signal to each process
+
+note that Unix killall kills all of the processes started by the user who runs the command
+
+RUNNING PROGRAMS PERSISTENTLY
+When you log out of a session, the programs started from that session are sent the SIGHUP signal (terminate)
+To run a program that will continue running when you log out use the nohup program
+
+NOHUP
+nohup program options
+
+This command causes the program to ignore the SIGHUP signal
+
+PKILL
+Another variant of kill
+Allows you to kill one or more proceses based on usernames, user IDs, group IDs, and other features as well as using regular expressions
+
+EXAM ESSENTIALS
+- Identity critical features of RPM and Debian package formats
+RPM and Debian packages store all of the files for a given package in a single file that also includes
+information about what other packages the software depends on. These systems maintain a database of
+installed packages and their associated files and dependences.
+
+- Describe the tools used for managing RPMs
+The rpm program is the main tool for installing, upgrading, and uninstalling RPMs. This program accepts
+operatings and options that tell it precisely what to do. The Yum utility, and particularly its yum
+command, enables installation of a package and all its dependencies via the Internet rather than from
+local package files.
+
+- Describe the tools used for managing Debian packages
+The dpkg program installs or uninstalls a single package or a group of packages that you specify. The apt-get utility retrieves programs from installation media or from the Internet for installation, and it can automatically upgrade your entire system. The dselect program serves as a menu driven interface to apt-get, enabling you to select programs that you want to install from a text mode menu.
+
+- Summarize tools for extracting files and converting files between package formats
+The rpm2cpio program can conert an RPM file to a cpio archive, enabling users of non-RPM systems to access files in an RPM. The alien utility can convert in any direction between Debian packages, RPMs, and tarballs. This enables the use of packages for one system on another.
+
+- Summarize the reasons for using shared libaries
+Shared libraries keep disk space and memory requirements manageable by placing code that's need by man programs in separate files from the programs that use it, enable one copy to be used multiple times. More generally, libaries enable programmers to use basic "building blocks" that others have written without having to reinvent code constantly.
+
+- Describe methods available to change the library path
+The library path can be changed system wide by editing the /etc/ld.so.conf file and then typing ldconfig. For temporary or per-user changes, directories may be added to the path by placing them in the LD_LIBRARY_PATH environment variable.
+
+- Explain the difference between foreground and background processes
+Foreground processes have control of the current terminal or text mode window (such as xterm). Background process don't have exlusive control of a terminal or text mod window but are still running.
+
+- Describe how to limit the CPU time used by a process
+You can launch a program with nice or use renice to alter its priority in obtaining CPU time.
+If a process is truly out of control you can terminate it with the kill command.
+
+
+CHAPTER 3 CONFIGURING HARDWARE
+
+Configuring the Firmware and Core Hardware
+Motherboard firmware : initializes the motherboard's firmware and controls the boot process
+The motherboard's firmware resides in electronically erasable programmable read only memory (EEPROM) aka flash memory
+POST : Power On Self Test
+
+BIOS : basic input / ouput system
+EFI : extensible firmware interface
+UEFI : unified EFI
+Orginal EFI > new UEFI (effectively EFI 2.x)
+
+Boot Process:
+POST > initializes hardware to a known operational state, loads the boot loader from the boot device > passes control to the boot loader which in turn loads the OS
+
+Historically an additional BIOS purpose would provide I/O services to the OS and apps
+Newer: Linux kernel uses the BIOS to collect information about the hardware, however, once running it does not use BIOS services for I/O
+3.0.0 kernel : Linux takes advantage of few of these EFI features
+
+IRQs
+Interrupt request, or interrupt, is a signal sent to the CPU instructing it to suspend its current activity
+and to handle some external event such as keyboard input
+
+x86: IRQs are measured from 0 to 15
+x86_64: provide more than 16 IRQs
+
+IRQ	Typical Use			    Notes
+0	System Timer			Reserved for internal use
+1	Keyboard			    Reserved for keyboard use only
+2	Cascade for IRQs 8-15	The original x86 IRQ handling circuit can manage just 8 IRQs
+					        2 are tied together to handle 16 IRQs
+					        but IRQ 2 must be used to handle IRQs 8-15
+3	Second RS-232           May also be shared by a fourth RS-232 serial port
+    serial port
+	(COM2 in Windows)
+4	First RS-232            May also be shared by a third RS-232 serial port
+    serial port
+	(COM1 in Windows)
+5	Sound card / 2nd
+    parallel port
+	(LPT2 in Windows)
+6	Floppy disk controller	Reserved for the first floppy disk controller
+7	First parallel port
+	(LPT1 in Windows)
+8	Real-time clock			Reserved for system clock use only
+9	ACPI system             Use by Intel chips for the Advanced Configuration and Power Interface (ACPI)
+    control interrupt	    used for power management
+10	Open interrupt
+11	Open interrupt
+12	PS/2 mouse
+13	Math coprocessor		Reserved for internal use
+14	Primary ATA controller	The controller for ATA devices such as HDDs
+					        traditionally /dev/hda and /dev/hdb under Linux
+					        Modern: treat serial ATA disks as SCSI disks (dev/sdx)
+
+ISA : Industry Standard Architecture
+The ISA bus design makes sharing an interrupt between 2 devices tricky (been rare since 2001)
+PCI : Peripheral Component Interconnect (newer) makes sharing easier
+
+cat /proc/interrupts to export what IRQs are being used
+The /proc filesystem is a virtual filesystem - it does not refer to actual files on a hard disk but
+to kernel data that is convenient to represent using a filesystem
+
+/proc/interrupts file lists the IRQs that are in use by Linux, however, Linux does not begin using an
+IRQ until the relevant driver is loaded.
+Thus /proc/interrupts list may not show all of the interrupts configured on the system.
+
+I/O ADDRESSES
+also referred to as I/O ports are unique locations in memory that are reserved for communications
+between the CPU and specific physical hardware devices
+Like IRQs, I/O addresses are commonly associated with specific devices and are not usually shared
+
+LINUX DEVICE	WINDOWS NAME	TYPICAL IRQ	I/O ADDRESS
+/dev/ttyS0	COM1		4		0x03f8
+/dev/ttyS1	COM2		3		0x02f8
+/dev/ttyS2	COM3		4		0x03e8
+/dev/ttyS3	COM4		3		0x02e8
+/dev/lp0	LPT1		7		0x0378-0x037f
+/dev/lp1	LPT2		5		0x0278-0x027f
+/dev/fd0	A:		6		0x03f0-0x03f7
+/dev/fd1	B:		6		0x0370-0x0377
+
+cat /proc/ioports
+explore what I/O addresses the computer is using by examing the contents of /proc/ioports
+as with IRQs if your system suffers from I/O port conflicts you must reconfigure one or more devices
+
+DMA ADDRESSES
+Direct memory addressing (DMA) is an alternative method of communication to I/O ports
+Rather than have the CPU mediate the transfer of data between a device and memory, DMA permits the
+device to transfer data directly without the CPU's attention
+
+The result can lower CPU requirements for I/O activity which can improve overall system performance
+To support DMA the x86 arch implements several DMA channels each of which can be used by a particular device
+
+cat /proc/dma
+4: cascade
+
+Output indicates that DMA channel 4 is in use
+
+Boot Disks and Geometry Settings
+
+BIOS: the BIOS boot process begins with the computer reading a boot sector (typically the first sector) from a disk and executing that code. Thus boot options for BIOS based computers are limited; you can only select the order in which various boot devices are examined to find a boot sector
+
+EFI: the boot process involves the computer reading a boot loader file from a filesystem on a special partition known as the EFI System Partition (ESP)
+
+This file either can take a special default name or can be registered in the computer's NVRAM
+EFI computers often present an extended range of boot options, involving both default boot loader files from various devices (to enable granting precedence to a bootable USB flash drive for example) and multiple boot loaders on the computer's hard disks. Early EFI implementations present simple BIOS like boot options.
+
+One time boot: modern computers can make temporary changes by providing a special key to allow a one time change to the boot sequence. Older computers you must locate the appropiate firmware option, change it, and reboot
+
+CHS geometry is a holdover from the early days of the x86 arch
+traditional hard disk layout: consists of a fixed number of read/write heads that can move across the disk surfaces (or platters). As the disk spins, each head marks out a circular track on its platter. These tracks collectively make up a cylinder. Each track is broken down into a series of sectors.
+
+Any sector can be identified by: a cylinder number, a head number, and a sector number (CHS code)
+Modern HDDs relay this information to the BIOS automatically.
+
+CHS Problems
+- plain CHS geometry tops out at 504MiB (mebibyte more accurate than megabyte MB)
+- various patches such as CHS geometry translation, can be used to expand the limit to about 8GiB
+
+LOGICAL BLOCK ADDRESSING (LBA) or LINEAR BLOCK ADDRESSING
+In this mode, a single unique number is assigned to each sector on the disk and the disk's firmware is smart enough to read from the correct head and cylinder when given this sector number
+
+EFI does not use CHS addressing at all (except in compatibility mode) instead of uses LBA
+
+COLDPLUG AND HOTPLUG DEVICES
+Device types differ depending on whether they can be physically attached and detached when the system is turned on (aka hot)
+
+Managing Hot Plug Devices
+
+Sysfs : the sysfs virtual filesystem, mounted at /sys, exports information about devices so that user space utilities can access the information
+
+A user space program is one that runs as an ordinary program, whether it runs as an ordinary user or as root
+kernel space code runs as part of the kernel
+Typically only the kernel and kernel space code can communicate directly with hardware
+Traditionally, the /dev/ filesystem has provided the main means of interface between user-space programs and hardware
+
+HAL DAEMON
+Hardware abstraction layer (HAL) daemon, or hald, is a user space program that runs at all times (a daemon) and provides other user space programs with information about available hardware
+
+D-BUS
+Desktop bus (D-Bus) provides further abstraction of hardware information access. Runs as a daemon. Enables processes to communicate with each other as well as to register to be nofified of events, both by other processes and by hardware (such as the availability of a new USB device)
+
+UDEV
+Traditionally, Linux has created device nodes as conventional files in the /dev dir tree
+udev : a virtual filesystem mounted at /dev which creates dynamic device files as drivers are loaded and unloaded
+can be configured in /etc/udev
+
+CONFIGURING EXPANSION CARDS
+Many hardware devices require configuration: set the IRQ, I/O port, and DMA addresses (not all dev use all 3)
+
+CONFIGURING PCI CARDS
+1) Linux kernel - find in the kernel configuration under Bus Options
+2) Most firmware have PCI options to change the way PCI resources are allocated
+3) Linux drivers support options to configure the hardware. You then pass these options to the kernel using a boot loader or as kernel module options
+4) Use the setpci utility to query and adjust PCI devices' configurations directly
+
+Use lspci command to check how PCI devices are currently configured
+
+LSPCI
+
+Options
+
+-v : increases verbosity of output, may be doubled or tripled for yet more output
+-n : displays information in numeric codes rather than translating codes to manufacturer and device names
+-nn : displays both the manufacturer and device names and their associated numeric codes
+-x : displays the PCI configuration space for each device as a hexadecimal dump (add -xxx, -xxxx for more)
+-b : shows IRQ numbers and other data as seen by devices rathar than the kernel
+-t : displays a tree view depicting the relationship between devices
+-s : displays only devices that match the listed specification. Can be used to trim the output results.
+[[[[domain]:]bus]:][slot][.[func]]
+-d : shows data on the specified device
+[vendor]:[device]
+-i : uses the specified file to map vendor and device IDs to names (default is /usr/share/misc/pci.ids)
+file
+-m : dumps data in a machine-readable form instended for use by scripts. 
+A single -m uses a backward compatible format, whereas doubling -mm uses a newer format
+-D : displays PCI domain numbers - usually supressed
+-M : performs a scan in bus-mapping mode, can reveal devices hidden behimd a misconfigured PCI bridge (only root)
+
+Learning about Kernel Modules
+Kernel drives (usually in the form of kernel modules) handle hardware in Linux
+/lib/modules
+
+LSMOD
+See the currently loaded modules on the system
+Module		Used By
+Name of module 	describes what is using the module
+
+All entries have a number - indicates the number of other modules and processes using that module
+lsmod only displays information about kernel modules NOT about drivers that are compiled directly into the kernel
+
+MODINFO
+Show information about a Linux Kernel module
+
+Loading Kernel Modules
+1) insmod - inserts a single module into the kernel (requires modules it depends on to already be loaded)
+requires full module name
+insmod /lib/modules/3.x/kernel/drivers/bluetooth/bluetooth.ko
+2) modprobe - automatically loads any depended on modules (generally preferred)
+modprobe bluetooth
+- as with insmod you can add kernel options to the end of the command line
+- modprobe relies on configuration files
+
+MODPROBE OPTIONS
+-v --verbose : display extra information, includes a summary of every insmod operation
+-C filename : change the configuration file or directory (by default /etc/modprobe.d
+-n --dry-run : dry run, perform checks and all other operations except the actual module insertions (debugging)
+-r --remove : remove the specified module and any on which it depends
+-f --force : force loading module even if the kernel version does not match what the module expect - potentially dangerous, occassionally required with 3rd party binary only modules
+--show-depends : shows all of the modules on which the specified module depends
+-l --list : displays a list of available options whose names match the wildcard you specify
+modprobe -l v* : shows all modules whose names begin with v
+
+Removing Kernel Modules
+
+RMMOD
+-v --verbose : display extra information
+-f --force : forces modules removal even if the modules is marked as being in use (dangerous)
+Ths option has no effect unless the CONFIG_MODULE_FORCE_UNLOAD kernel option is enabled
+-w --wait : wait for the module to become unused rather than return an error message
+
+Configuring USB Devices
+USB Basics : protocol and hardware port for transferring data to and from devices
+
+Linux USB drivers : UHCI, OHCI, EHCI, and R8A66597
+UHCI / OHCI controllers handle USB 1.x devices (most other controllers handle 2.0)
+Kernel 2.6.31 or newer to use USB 3.0 hardware
+
+LSUSB : list USB devices
+
+Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+Bus 002 Device 002: ID 80ee:0021 VirtualBox USB Tablet
+Bus 002 Device 001: ID 1d6b:0001 Linux Foundation 1.1 root hub
+
+2 buses (001, 002)
+
+OPTIONS
+-v : verbose
+-s [[bus]:][devnum] restricts output to the specified bus and device number
+-d [vendor]:[product] : vendor and product are the codes just after ID on each line of lsusb output
+-D filename : displays information about the device that's accessible via filename
+should be a file in /proc/bus/usb - provides low level interface to USB devices
+-t : tree view see what devices are connected to specific controllers more easily
+-V --version : display the version of lsusb and exit
+
+Early linux : seperate driver for each USB device
+Linux provides a filesystem that in turn provides access to USB devices in a generic manner
+/proc/bus/usb
+
+USB Manager Applications
+Linux kernel relies on external utilities to help manage hot pluggable devices
+2 utilites (not usually installed) : usbmgr and hotplug
+
+usbmgr : runs in the background to detect changes on the USB bus
+when changes are detected it loads or unloads the kernel modules that are required to handle the devices
+/etc/usbmgr : handle specific devices
+/etc/usbmgr/usbmgr.conf to control the overall configuration
+has been in decline due to the USB filesystem (/proc/bus/usb)
+
+hotplug : relies on kernel support added with the 2.4.x kernel series
+es /etc/hotplug to contro lthe configuration of specific USB devices
+/etc/hotplug/usb.usermap : contains a database of USB device IDs and pointers to scripts in /etc/hotplug/usb
+
+Configuring Hard Disks
+PATA - Parallel Advanced Technology Attachment aka ATA 
+SATA - Serial Advanced Technology Attachment
+SCSI - Small Computer System Interface
+
+Configuring PATA Disks
+Popular with x86 PC world (2005 and earlier) - replaced by SATA
+Use a parallel interface - several bits of data are transferred over the cable at once - wide cables (40 / 80 lines)
+Connect up to 2 devices - usually 3 connectors (1 for mobo, 2 for devices) Masters / Slaves
+/devhd* names
+
+Configuring SATA Disks
+Connect to their motherboards or controllers on a 1-1 basis 
+Serial bus - only one bit of data can be transferred at a time
+
+Configuring SCSI Disks
+Latest format - SAS - Serial Attached SCSI
+SCSI supports 8 or 16 devices per bus, depending on the variety
+One of these devices is the SCSI host adapter
+Each device has its own ID number 
+SCSI HDDs use /dev/sdx x is a and up
+SCSI Tapes use /dev/stx and /dev/nstx x is 0 and up
+SCSI CD/DVD ROMS use /dev/scdx and /dev/srx x is 0 and up
+
+Configuring External Disks
+USB, IEEE-1394, SCSI, etc
+
+Designing a Hard Disk Layout
+
+Partioning - advantages
+- Multiple OS support
+- Filesystem choice
+- disk space management
+- disk error protection
+- security : different security related mount options (readonly, etc.)
+- backup
+
+Partitioning Schemes
+Partitions are defined as data structures that are written to specified parts of the hard disk
+
+MBR - Master Boot Record - common method up until 2010 on x86 and x86-64 hardware - stores its data on the first sector of the disk
+Limited to partitions and partition placement of 2 TB at least on a sector size of 512 bytes
+
+GPT - GUID Partition Table - successor, has much higher limits and other advantages
+
+APM - Apple Partition Map
+
+BSD - Berkeley Standard Distribution
+
+MBR Partitions - 
+Original allowed for 4 partitions
+New - uses 3 partition types
+1) primary partitions - same as the original partition types
+2) extended partitions - special type of primary partition that serves as a placeholder for the next type
+3) logical partitions - reside within an extended partition
+
+Primary partitions - have numbers in the range 1-4 (gaps can appear)
+Logical partitions - numbered 5 and up (gaps cannot appear)
+
+MBR data structure holds the primary BIOS boot loader - the first disk loaded code that the CPU executes when a BIOS based computer boots
+
+MBR backup - sfdisk -d /dev/sda > sda-backup.txt
+MBR restore - sfdisk -f /dev/sda < sda-backup.txt
+
+MBR Type codes - 1 byte (2 digit hexadecimal) numbers to help identify their purpose
+0x0c (FAT)
+0x05 (old type of extended partition)
+0x07 (NTFS)
+0x85 (Linux extended partition)
+0x0f (newer type of extended partition)
+0x82 (Linux swap)
+0x83 (Linux filesystem)
+
+GPT Partitions
+Part of Intel's EFI specification - can still be used on computers without EFI
+Must use for drives > 2TB
+Has a protective MBR - a legal MBR definition that makes GPT unaware utilities think the disk holds a single MBR partition that spans the entire disk
+GPT exists on both the start and end of the disk for redundancy
+No primary / extended / logical distinction of MBR
+Up to 128 partitions (may be raised)
+Gaps are allowed in partition numbering
+GPT type codes are 16 byte GUID values
+
+LVM - Alternative to Partitions
+Logical Volume Management
+To use LVM you set aside one or more partitions and assign them MBR partition type codes of 0x8e (or eq for GPT disks)
+pvcreate, vgcreate, lvcreate, lvscan to manage the partitions (known as physical volumes)
+Access the logical volumes in the /dev/mapper directory
+++Advantage: enables you to resize your volumes easily without worrying about the positions or size of surrounding partitions. 
+Logical groups house logical volumes
+Useful if you want to create an installation with many specialized filesystems, retain option of resizing...also with creating very large filesystems to big to fit on a single physical disk
+
+Mount Points
+Common Partition and Filesystem Layouts
+
+Partition		Est Size		Use
+Swap (not mounted)	1x - 2x RAM size	serves as an adjunct to system RAM
+/home			200MiB - 3TB+		Holds user data files - isolating it preserves
+						user data during a system upgrade
+/boot			100-500MiB		Holds critical boot files. Creating as a 
+						seperate partition for older BIOS / boot loaders
+						which can't boot above 504MiB - 2 TiB
+/usr			500MiB-25GiB		Holds most Linux programs and data files
+						Since 2012 changes make more diff. to create
+						a seperate /usr partition
+/usr/local		100MiB-3GiB		Holds Linux program and data files unique to this
+						installation, particulary those you compile yourself
+/opt			100MiB-5GiB		Holds Linux program and data files that are
+						associated with 3rd party packages (commercial)
+/var			100MiB-3TiB+		Holds miscellaneous files associated with day2day
+						functioning. Transient in nature.
+/tmp			100MiB-20GiB		Holds temporary files created by users
+
+/mnt			N/A			Not a separate partition, its sub dir are used as mount points
+/media			N/A			Holds sub dir used as mount points for remavable media
+
+2.4.x and newer kernels support a dedicated /dev filesystem
+the udev utility control the /dev filesystem in recent versions of Linux
+
+Creating Partitions and Filesystems
+
+FDISK
+
+fdisk - fixed disk
+
+Display partition - fdisk -l /dev/sda or p in interactive
+
+Create a partition - n in interactive
+primary, extended, logical
+starting cylinder
+ending cylinder or size
+older versions use cylinders, newer in size
+can use +20G to create a 20GiB partition
+
+Recent partition programs start partitions on 1MiB (2048 sector)
+
+Delete a partition - d
+
+Change a partition type - t then enter partition number and type code (example 0x83)
+
+List partition types - l in interactive....or L when prompted for the partition type
+
+Mark partition bootable - a
+
+Exit - q (quit), w (write)
+
+
+GDISK
+Interactive GUID partition table (GPT) manipulator
+
+→ sudo gdisk /dev/sda
+GPT fdisk (gdisk) version 1.0.1
+
+Partition table scan:
+  MBR: protective
+  BSD: not present
+  APM: not present
+  GPT: present
+
+Found valid GPT with protective MBR; using GPT.
+
+Command (? for help): print
+Disk /dev/sda: 16777216 sectors, 8.0 GiB
+Logical sector size: 512 bytes
+Disk identifier (GUID): 91E2D4FF-C02E-40ED-8766-1ACF45340EA0
+Partition table holds up to 128 entries
+First usable sector is 34, last usable sector is 16777182
+Partitions will be aligned on 2048-sector boundaries
+Total free space is 4029 sectors (2.0 MiB)
+
+Number  Start (sector)    End (sector)  Size       Code  Name
+   1            2048         1050623   512.0 MiB   EF00  EFI System Partition
+   2         1050624        14682111   6.5 GiB     8300
+   3        14682112        16775167   1022.0 MiB  8200
+
+Code column shows the 16byte GUID value for the GPT partition
+gdisk : also can delete partitions, create new, and write changes like fdisk
+
+PARTED
+a partition manipulation program
+
+parted /dev/sda
+print
+mklabel gpt
+mkpart primary ext4 1024kb 2tb
+
+File System Types
+
+Ext2fs
+Second Extended File System (ext2fs or ext2)
+Not widely used anymore, has a reputation for reliability
+Can be used for /boot partition
+Non journaled
+
+Ext3fs
+Third Extended File System (ext3fs or ext3)
+ext2fs + journaling
+Reliable as ext2fs but that recovers from power outages and system crashes much more quickly
+
+Ext4fs
+Fourth Extended File System (ext4fs or ext4)
+Supports large disks (over 16TiB, the limit for ext2fs and ext3fs) and large files (over 2TiB) as well
+as extensions intended to improve performance
+
+ReiserFS
+Designed from scratch as a journaling filesystem for Linux
+Good at handling a large number of small files (say, less than about 32KB) as ReiserFS uses various tricks to squeeze the end of files into each other's unused spaces.
+
+JFS
+Journaled File System 
+IBM developed for its AIX OS on mainframe systems, later implemented it on its attempt at a workstation OS called OS/2
+After demise of OS/2, JFS was donated to Linux - technically sophisticated journaling FS
+
+XFS
+Extents File System
+Silicon Graphics (SGI) created for its IRIX OS and later donated to Linux
+Reputation for robustness, speed, and flexibility on IRIX, flexibility not supported well on Linux
+
+BTRFS
+advanced filesystem similar to Sun's Zettabyte File System (ZFS)
+fast performer, able to handle very large disks and files
+
+FAT
+File Allocation Table
+old and primitive but ubiquitous - only FS supported by DOS and early versions of Windows
+
+NTFS
+New Technology File System
+2.6.x kernel series: linux can reliably read and overwrite files on NTFS but can't write new files
+NTFS-3G driver is the most popular
+
+HFS and HFS+
+Hierachical File System
+Apple uses this, Linux provides full read/write HFS support
+Apple has extended HFS to better support large HDDs and many Unix like features with HFS+ (extended)
+
+ISO-9660
+Standard FS for CD-ROMs
+Lvl 1 - similar to original FAT, supports 8.3 filenames
+Lvl 2,3 - support to longer 32 char filenames
+Linux ISO 9660 also works with Rock Ridge extensions - support Unix style long filenames, permissions, symbolic links
+Joliet - support for long Windows filenames
+
+UDF
+Universal Disc Format
+for optical disks, commonly used on DVD-ROMs and recorable optical dics
+
+Creating a Filesystem
+
+mkkfs -t type_code /dev/sd*
+-c : perform a bad block check - every sector in the partition is checked to be sure it can reliably store data
+-m percent : reserved space percentage, Linux will report the disk is full before it really is
+
+Creating Swap Space
+Swap partition - Linux treats as an extension of memory
+Code 0x82
+
+# create swap space
+mkswap /dev/sdc1
+# activate swap
+swapon /dev/sdc1
+# to permanently activate
+vi /etc/fstab
+
+Maintaining Filesystem Health
+- overloaded with too much data
+- tuned inappropiately
+- corrupted by buggy drivers, utilities, or hardware errors
+- generally fixed when not mounted to preserve data
+
+Tuning Filesystems
+ext2,3,4 include tools that enable you to set filesystem options that affect performance
+
+dumpe2fs, tunefs, debugfs
+
+DUMPE2FS
+
+→ sudo dumpe2fs /dev/sdc1 -h
+dumpe2fs 1.42.13 (17-May-2015)
+Filesystem volume name:   <none>
+Last mounted on:          <not available>
+Filesystem UUID:          3b22a321-b86a-4050-9bd1-cf7b4f0aff89
+Filesystem magic number:  0xEF53
+Filesystem revision #:    1 (dynamic)
+Filesystem features:      has_journal ext_attr resize_inode dir_index filetype extent flex_bg sparse_super large_file huge_file uninit_bg dir_nlink extra_isize
+Filesystem flags:         signed_directory_hash
+Default mount options:    user_xattr acl
+Filesystem state:         clean
+Errors behavior:          Continue
+Filesystem OS type:       Linux
+Inode count:              131072
+Block count:              524027
+Reserved block count:     26201
+Free blocks:              506831
+Free inodes:              131061
+First block:              0
+Block size:               4096
+Fragment size:            4096
+Reserved GDT blocks:      127
+Blocks per group:         32768
+Fragments per group:      32768
+Inodes per group:         8192
+Inode blocks per group:   512
+Flex block group size:    16
+Filesystem created:       Sat Dec 30 09:35:06 2017
+Last mount time:          n/a
+Last write time:          Sat Dec 30 09:35:06 2017
+Mount count:              0
+Maximum mount count:      -1
+Last checked:             Sat Dec 30 09:35:06 2017
+Check interval:           0 (<none>)
+Lifetime writes:          33 MB
+Reserved blocks uid:      0 (user root)
+Reserved blocks gid:      0 (group root)
+First inode:              11
+Inode size:	          256
+Required extra isize:     28
+Desired extra isize:      28
+Journal inode:            8
+Default directory hash:   half_md4
+Directory Hash Seed:      607cdbef-b082-4dee-8b79-cdb3e2d5699f
+Journal backup:           inode blocks
+Journal features:         (none)
+Journal size:             32M
+Journal length:           8192
+Journal sequence:         0x00000001
+Journal start:            0
+
+XFS_INFO
+dumpe2fs but for XFS, requires that the partition be mounted
+xfs_info /dev/sdc1
+
+XFS_METADUMP
+program copies the filesystem's metadata (filenames, file sizes, and so on) to a file
+xfs_metadump /dev/sdc1 ~/dump-file
+
+Adjusting Tunable Filesystem Parameters
+
+TUNE2FS
+enables you to change many of the filesystem parameters that are reported by dumpe2fs
+
+Adjust the Maximum Mount Count
+ext2, 3, 4 require a periodic disk check with fsck after x amount of disk mounts
+-c mounts : adjust maximum number of times disk may be mounted without a check
+-C mounts : trick system into thinking the FS has been mounted a certain number of times, sets the mount counter
+
+Adjust the Time between Checks
+Periodic disk checks are required based on time as well as the number of mounts
+-i interval : max time between checks
+normally interval is a char with 'd', 'w', 'm' appended (days, weeks, months)
+
+Add a Journal
+-j : adds a journal to the FS
+will converting an ext2 FS into an ext3 FS
+
+Set the Reserved Blocks
+-m percent : percentage of disk space that's reserved for use by root (default value of 5)
+Can be set to 0 for remable disks intended to store user files
+-r : reserve space can also be set in blocks rather than a percentage
+
+XFS_ADMIN
+rough equivalent to tune2fs
+-j : enables version 2 log (journal) format, improve performance in certain situations
+-l , -u : obtain the filesystem's label (name) and universally unique identifier (UUID)
+-L label, -U uuid : change the FS's label or UUID
+label is at most 12 char in length,
+
+Interactively Debugging a Filesystem
+
+DEBUGFS
+ext2,3,4 file system debugger
+debugfs /dev/sdc1
+
+-c : open possibly corrupt files with read only
+
+Display Filesystem Superblock Information
+show_super_stats / stats : produces superblock information (similar to dumpe2fs)
+
+Display Inode Information
+stat filename : display inode data on a file or dir 
+
+Undelete a File
+undelete inode name : inode is the inode number of the deleted file, name if the filename you want to give it
+^limited utilty as you must know the inode number associated with the deleted file
+lsdel, list_deleted_inodes : list deleted inodes, but may not provide enough clues to let you zero in on the file
+
+Extract a File
+write internal-file external-file : internal-file is the name of a file in the FS that you're manipulating and external-file is a filename on your main Linux system
+
+Manipulate Files
+work debugfs, can use cd (change dir), ln (links), rm (remove a file) and so on...
+
+Obtain Help
+list_requests, lr, help, ? : produce a summary of available commands
+
+XFS_DB
+similar to debugfs, provides fewer tools for novice, intermediate user...mostly for XFS experts
+
+Maintaining a Journal
+ext2 is a traditional filesystem, good FS but suffers from power loss, system crash, or uncontrolled shutdown
+need to check the filesystem on the next boot
+
+Journaling FS : maintains a journal which is a data structure that describes pending operations
+Prior to writing data to the disk's main data structures Linux describes what it's about to do in the journal
+When the operations are complete their entries are removed from the journal
+
+System crash > examine journal > check defined data structures for inconsistencies > roll back or complete the changes
+does not need to check every data structure, results in much faster recovery
+
+Checking Filesystems
+
+FSCK
+check and repair a filesystem
+fsck is actually a front for other programs, such as e2fsck (aka fsck.ext2, ext3, ext4) or XFS's xfs_check and xfs_repair
+
+OPTIONS
+
+-A : check all filesystems marked to be checked in /etc/fstab
+-C : text-mode progress indicator (most do not support, e2fsck does)
+-V : verbose
+-N : simulate mode
+-t fstype : force the filesystem type - usually auto detected
+-A -f fstype : check only the specified filesystems, even if others are marked to be checked
+-A -f nofstype : check only the specified filesystems expect the fstype, even if others are marked to be checked
+--option : fsck passes options it doesn't understand as --option to the underlying check program
+-a, -p : automatic check
+-r : interactive check
+-f : force a full filesystem check even if the FS appears to be clean
+
+Monitoring Disk Use
+
+DF
+report FS disk space usage
+df [options] [files]
+-a, --all : incudes pseudo FS with a size of 0, /proc, /sys, /proc/bus/usb, etc.
+-h, --human-readable : scale and label its units (power of 2,1024 (eg 1023M)
+-H, --si : same as -h but with powers of 10,1000 (eg 1.1G)
+-k, --kilobytes :
+-m, --megabytes : 
+-i, --inodes : receive a report on available and used inodes (works well for ext2,3,4,XFS and others)
+-l, --local : omit network filesystems, can help speed up operation
+-T, --print-type : adds the filesystem type
+-t fstype, --type=fstype : display only inforomation for that FS type
+-x fstype, --exclude-type=fstype : opposite effect
+
+DU
+estimate file space usage
+du [options] [directories]
+-a, --all : report on individual files as well
+-c, --total : append a grand total to the end of the output
+-h, --human-readable : scale and label its units
+-H, --si : same as -h but with powers of 10,1000 (eg 1.1G)
+-k, --kilobytes :
+-m, --megabytes : 
+-l, --count-links : count sizes man times if hard linked - but default only counts files that appear multiple times as hard links only once
+--max-depth=n : limit the report to n levels - the subdirs contents are counted even if they aren't reported (output)
+-s, --summarize : limits the report to those files and directories that you specify on the cmdline
+equivalent to --max-depth=0
+-x, --one-file-system : limits the report to the current FS, if another FS is mounted within the tree that you want summarized its contents are not included in the report
+
+du -s /home/* determine which user is using the most disk space
+
+Mounting and Unmounting Filesystems
+
+MOUNT - mount a filesystem
+
+MOUNT FLAGS
+-a : mount all FS listed in /etc/fstab
+-r : mount read only
+-v : verbose
+-w, -o rw : attempt to mount read/write (the default) some experimental drivers default to read only
+-t fstype : specify the filesystem (by default auto-detected)
+-L label, -U uuid : mount the FS by label or UUID
+-o : add many options using -o, many are FS specific
+
+OPTIONS		SUPPORTED FS	Description
+defaults	all		default options for the FS
+loop		all		causes the loopback device for this mount to be used
+				mount file as if it were a disk partition
+				mount -t vfat -o loop image.img mounts the file image.img as if it were a disk
+auto, noauto	all		mount or does not at boot time or when root issues mount -a
+				default is auto, noauto is appropriate for removable media
+user, nouser	all		allows or disallows an ordinary user to mount the FS, default nouser
+				user is appropriate for removal media
+				only the user who mounted the FS may unmount it
+users		all		similar to user, except that any user may unmount a FS when mounted
+credentials	?		credentials=$path_to_file (should be well protected, root read)
+username	?		username=name
+password	?		password=password
+owner		all		similar to user, except that the user must own the device file
+remount		all		changes 1 or more mount options without explicitly unmounting a partition
+				issue a mount on an already mounted FS but with remount along w/ new options
+				can be used to enable or disable write access to partition
+ro		all		read-only mount
+rw		all,read/write	read/write mount (default)
+uid=value	most FS that	sets the owner of all files, uid=1000 sets the owner to whoever has Linux
+		do not support	user ID 1000 (check /etc/passwd)
+		unix style
+		permissions (
+		vfat,hpfs,ntfs)
+gid=value	same as uid	works like uid=value but sets the group of all files on the filesystem
+				check /etc/group
+umask=value	same as uid	sets the umask permission on files, value is interpreted in binary as bits
+				to be removed from permissions on files
+				umask=027 yields permissions of 750 (777 - 027) or -rwxr-x---
+				used with uid=value, gid=value this option lets you control who can access files
+				on FAT, HPFS, and many other foreign filesystems
+dmask=value	same as uid	similar to umask, but sets the umask for directories only, not for files
+fmask=value	same as uid	similar to umask, but sets the umask for files only, not directories
+conv=code	most FS used on	if code is b or binary, Linux does not modify the files' contents
+		MS and Apple:	code if t or text, Linux auto converts files between Linux-style and Windows/MAC
+		msdos, umsdos	style end of line characters
+		vfat,hpfs,hfs 	code is auto, Linux applies the conversion unless file is a known binary file format
+				best to leave at binary (default) file conversions can cause serious issues
+norock		iso9660		disables rock ridge extensions for ISO-9660
+nojoliet	iso9660		disables the Joliet extensions for ISO-9660 CD-ROMs
+
+/etc/fstab
+ordinarily only root can mount, however, if fstab specifies the user, users, or owner option a non-root user can mount
+
+UMOUNT - unmount a filesystem
+-a : causes the system to unmount all of the partitions listed in /etc/mtab
+-f : force unmount operation - can be helpful for unmounting NFS mounts if the server is unreachable
+-r : if it can't unmount then attempt to remount as read only
+-t fstype : unmount filesystems of that type, can list multiple delimited by commas
+
+/etc/fstab
+DEVICE    MOUNT POINT    FILESYSTEM TYPE   MOUNT OPTIONS    BACKUP OPERATION	FILESYSTEM CHECK ORDER
+
+Device
+Usually a UUID or a network drive... server:/home
+
+Mount Point
+where the disk or partition will be mounted
+
+Filesystem Type
+FS type code is the same as the type code used to mount a FS with the mount command
+can be auto
+
+Mount Options
+may specify multiple options delimited by commas
+uid=500,umask=0 for /windows
+
+Backup Operation
+contains a 1 if the dump utility should backup a partition, 0 if it should not
+dump program was once a common backup tool, but is much less popular today
+
+Filesystem Check Order
+At boot time Linux uses fsck to check FS integrity
+0 : should not check a FS
+1: for root
+2: for all others
+
+Managing User-Mountable Media
+user user,users,owner option
+
+File Management
+Naming Files
+Linux: filenames: uppercase, lower case letters, numbers, most punctuation and control characters
+recommended to restrict nonalphanumberic symbols to . - _
+Do Not Use these in filenames: *, ?, \, \, "
+Max file length: 255 char / 255 bytes
+
+Wildcard Rules
+? : single character : b??k will match book, balk, buck
+* : matches any char including no char: b**k will match book, balk, bk, bbk, backtrack
+[] : bracketed match any char in the set : b[ae]ok matches baok and beok : b[ae]o[ks] : b[a-z]ck
+
+LS
+-a : list all
+-l : long listing, shows permission, owner, group, size, creation date
+-F, --clasify : append indicator code
+	/ Directory
+	* Executable
+	| Named Pipe
+	= Socket
+	@ Symbolic Link
+--color : color coded listing
+-d : ls new/ displays directory contents, but with -d only lists dir names in new/
+-R, --recursive : ls dir and sub dir contents
+
+CP
+-f, --force : overwrite existing files
+-i, --interactive : prompt before overwriting
+-p, --preserve : preserve ownership and permissions, if possible (normally not preserved)
+-R, --recursive : copies the entire dir including sub dir (-r usuually the same but now always)
+-a, --archive : similar to -R, also preserves ownership and copies links as is (-R copies the files to which symbolic links points to)
+-u, --update : copy the file only if the original is newer than the target or if target doesn't exist
+
+TOUCH
+3 timestamps for every file
+- last file modification time
+- last inode change time
+- last access time
+
+-a, --time=atime : change the access time alone, not the modification time
+-m, --time=mtime : change the modification time alone, not the acess time
+-c, --no-create : don't create files if they already exist
+-t timestamp : sets the time to the value in the form MMDDhhmm [[CC]YY][.ss]
+MM month, DD day, hh hour (24hr clock), mm minute
+[CC]YY year (2018 or 18), ss second
+-r reffile, --reference=reffile : reffile is a file whose time stamp you want to replicate
+
+ARCHIVE
+tar : tape archiver
+tar [options] destination/tar_file_name files-to-archive
+tarball : created by tar and typically compressed with gzip, xz, or bzip2
+
+Qualifier			Abb	Description
+--directory dir			C	changes to directory dir before performing operations
+--file [host:] file		f	uses the file called file, called host as the archive file
+--listed-incremental file	g	incremental backup or restore, using file as a list of prev archived files
+--multi-volume			M	creates or extracts a multi volume archive
+--preserve-permissions		p	preserves all protection information
+--absolute-paths		P	retains the leading / on filenames
+--verbose			v	list all files read or extracted, used with --list displays file sizes
+					ownership, and time stamps
+--verify			W	verifies the archive after writing it
+--gzip, --ungzip		z	compresses an archive with gzip
+--bzip2				j,I,y	compresses an archive with bzip2
+--xz				J	compresses an archive with xz
+
+Command				Abb	Description
+--create			c	creates an archive
+--concatenate			A	appends tar files to an archive
+--append			r	appends non tar files to an archive
+--update			u	appends files that are newer than those in an archive
+--diff, --compare		d	compares an archive to files on disk
+--list				t	lists an archive's contents
+--extract, --get		x	extracts files from an archive
+
+# Create archive file and compress with gzip utility
+tar cvfz my-work.tgz ~/my-work
+tar cvfz /home/jteumer/new/my-work.tgz ~/my-work
+
+# Extract
+tar xvfz my-work.tgz
+
+# Examine before extracting
+tar tf my-work.tgz
+
+# Incremental backup - created archive is a level 0 backup
+tar cfz backup_usr.tgz --listed-incremental data.snar /usr/
+# Only backs up changes
+tar cfz backup_usr_1.tgz --listed-incremental data.snar /usr/
+
+# Incremental restore
+tar xfz --listed-incremental=/dev/null backup_usr.tgz
+tar xfz --listed-incremental=/dev/null backup_usr_1.tgz
+
+CPIO
+3 operating modes
+Copy-Out Mode : -o, --create : creates an archive and copies files into it (think copy out of)
+Copy-In Mode : 	-i, --extract : mode extracts data from an existing archive (think copy in to"
+^ if you provide a filename or pattern to match only those files will be extracted
+Copy-Pass Mode : -p, --pass-through : combines copy-out and copy-in modes
+^ copy a directory tree from one location to another
+
+Option
+-a, --reset-access-time : resets the access time after reading a file so it doesn't appear to have been read
+-A, --append : appends data to an existing archive
+-E, --pattern-file=filename : uses the contents of filename as a list of files to be extracted in copy-in mode
+-F, --file=filename: uses filename as cpio archive file, if omitted, cpio uses STDIN, STDOUT
+-H, --format=format : uses format for the archive file, ie 'bin' (default) 'crc' (newer binary format with a checksum) and 'tar' (used by tar)
+-I filename : uses filename instead of STDIN (unlike -F this option does not redirect output data)
+--no-absolute-filenames : in copy-in mode extracts files relative to current dir, even if archive's filenames contain the full directory paths
+-o filename : uses filename instead of STDOUT (unlike -F this option does not redirect input data)
+-t, --list : displays a table of contents
+-u, --unconditional : replaces all files w/o asking for verification
+-v, --verbose : verbose!, when used with -t displays additional listing info
+
+# Create archive file (uncompressed)
+find ./my-work | cpio -o > my-work.cpio
+
+# Create archive file (compressed)
+find ./my-work | cpio -o | gzip > my-work.cpio.gz
+
+# Extract (multi line)
+gunzip my-work.cpio.gz
+cpio -i < my-work.cpio
+
+# Extract (same line) : gunzip to STDOUT then pip to CPIO extract STDIN
+gunzip -c my-work.cpio.gz | cpio -i
+bunzip2 -c my-work.cpio.gz | cpio -i
+unxz -b my-work.cpio.gz | cpio -i
+
+DD
+low level copying program
+dd if=/dev/dvd of=/dev/sda3
+
+# 1024 * 720 bytes
+dd if=/dev/zero of=empy-file.img bs=1024 count=720
+
+Backing Up Using Optical Media
+cdrecord accepts input from a program like mkisofs, which creates an ISO-9660 or UDF filesystem
+
+create a tar or cpio archive on a hard drive disk then use mkisofs to place that archive in an ISO/UDF FS, then burn
+
+Managing Links
+
+Hard Links: produced by creating two directory entries that point to the same file (more precisely the inode)
+both filenames are equally valid and prominent
+to delete the file you must delete both hard links to the file
+hard links must exist on a single low level FS
+cannot create a hard link from your root (/) FS to a separate FS you've mounted on it
+
+Symbolic Links: a separate file whose contents point to the link-to file
+in most respects, accessing a symbolic link works just like accessing the original file
+can point across low level FS, can point from root (/) FS to a separate FS that you've mounted on it
+accessing the original file from the link consumes a tiny bit of time, hardly noticeable
+
+LN
+ln [options] source link
+-f, --force : remove any existing links or files that have the target link name
+-i, --interactive : similar effect as above but prompts before replacing
+-d, -F, --directory : ordinarily can't create hard links to directories, root can attempt to do so with this
+^unlikely to work because most FS don't support it
+-s, --symbolic : create a symlink, by default it is hard links
+
+# Create hard link
+ln empty-file.img hlink_empty
+
+# Once created the ls long listing 2nd column shows the link count
+-rw-rw-r-- 2 jteumer jteumer 720K Jan  7 10:27 empty-file.img
+-rw-rw-r-- 2 jteumer jteumer 720K Jan  7 10:27 hlink_empty
+1: file is NOT hard linked to another file
+2+:  count is incremented with each hard link count
+
+# ls -i show inode : will hard linked files will have the same inode
+137059 -rw-rw-r-- 2 jteumer jteumer 720K Jan  7 10:27 empty-file.img
+137059 -rw-rw-r-- 2 jteumer jteumer 720K Jan  7 10:27 hlink_empty
+137361 lrwxrwxrwx 1 jteumer jteumer   14 Jan  7 10:52 slink_empy -> empty-file.img
+
+Directory Commands
+
+MKDIR
+make directory
+mkdir [options] directory-name(s)
+-m. --mode=mode : causes the new dir to have the specified permission mode, expressed as an octal number
+-p, --parents : create parent directories as necessary : mkdir -p other/otherer/otherest
+
+RMDIR
+remove directory
+--ignore-fail-on-non-empty : still doesn't delete the dir, but doesn't return an error message
+-p, --parents : delete an entire dir tree, rmdir -p /one/two/three del /1/2/3 then /1/2 then /1 if no other 
+files or directories are present
+
+Managing File Ownership
+Each file has an individual owner and a group with which it is associated
+3 tiers of permissions to control access to files:
+- file's owner
+- file's group
+- all other users
+
+CHOWN
+only root may use chown to change ownership of files, however, ordinary users may use chown to change the group of files that they own (provided the users belong to the target group)
+chown [options] [newowner][:newgroup] filenames
+-R, --recursive : ownership change for the entire dir tree
+
+chown sally:skyhook forward.odt
+chown sally.skyhook forward.odt ( core file utils v8.14 and up can use dot (.) instead of : but it is deprecated)
+
+CHGRP
+change group ownership
+chgrp [options] newgroup filenames
+ordinary users may only change a file's group to a group to which they belong
+-R, --recursive : ownership change for the entire dir tree
+
+PERMISSIONS
+-rwxr-xr-x 2 jteumer jteumer 720K Jan  7 10:27 empty-file.img*
+string (-rwxr-xr-x) 10x char long encoded in 10 bits
+1st char is the file type code - determines how Linux will interpret the file (ordinary data, dir, special)
+1st group: file owner
+2nd group: group
+3rd group: all other users (world permissions)
+Individual permissions such as execute access for the file's owner are referred to as permission bits
+Linux encodes this info in binary form, permission info can be expressed as a 9 bit number in octal (base 8 form) because a base-8 number is 3 bits in length which means that base-8 representation of a permission string is 3 char long
+1: execute permission
+2: write permission
+4: read permission
+permission bits for a particular permission type are added together
+
+LINUX FILE TYPE CODES
+- : normal data file. Text, executable program, graphics, compressed data, or just about any other type of data
+d : directory: disk directories are files just like any other, however, contain filenames and pointers to disk inodes
+l : symbolic link: file contains the name of another file or dir - when accessed Linux tries to read the linked file
+p : named pipe, pipe enables 2 running Linux programs to communicate with each other
+	1 opens the pipe for reading, the other opens it for writing - enabling data to be transferred between prog
+s : socket, similar to named pipe, permits network and bidirectional links
+b : block device : file that corresponds to a hardware device to and from data is transferred in blocks of more than 1 	      byte. Ex disk devices (hard disks, usb flash drives, cdroms, etc.)
+c : character device : file that corresponds to a hardware device to and from which data is transferred in units of 1         byte. Ex: parallel port, RS-232 serial port, and audio devices
+
+Permission String	Octal Code	Meaning
+rwxrwxrwx		777		Read, write, execute for all 
+rwxr-xr-x		755		Read and execute for all users, owner has write permissions
+rwx------		700		Read, write, execute only for owner, nobody has else permissions
+
+Execute permission : makes sense for program files, when used with DIR the DIR contents can be searched
+highly disirable for dir, almost never will find a dir on which the execute bit is not set in conj with read bit
+
+Write permission w/ directories : if a user can write to a dir then that user can create, delete, or rename files in the dir as well. This is true even if the user isn't the ower of those files and does NOT have permission to write to those files. Use 'stick bit' instead.
+
+Symbolic links: always have 777 (rwxrwxrwx) granting all users full access to the file (the link itself) and NOT the linked to file
+- users can read the contents of the link
+- changing permissions on a symbolic link file with change the linked to file's permissions instead
+
+root : permissions don't apply even with 000 set
+
+SPECIAL PERMISSION BITS
+
+Set User ID (SUID) - used in conjunction with executable files
+- Linux runs the program with the permissions of who owns the file rather than the permissions of who runs the program
+- if a file owned by root has SUID bit set the program runs w/ root priv, can read any file on the sys
+(rwsr-xr-x) = SUID programs are indicated by an 's' in the owner's execute bit permission
+(rwSr-xr-x) = SUID bit is set on a file without execution permission set - SUID will not funtion, setting is benign
+chmod u+s /path/to/file
+
+Set Group ID (SGID)
+sets the running program's group to the file's group
+(rwxr-sr-x) = SGID programs are indicated by an 's' in the group's execute bit permission
+S - similar to SUID, setting is benign
+SGID : useful on directories, when set on a dir, new files or sub dir created in the original dir will inherit the group ownership of the directory rather than be based on the user's default group
+chmod g+s /path/to/file
+
+Sticky Bit :  used to protect files from being deleted by those who do not own the files
+(rwxr-xr-t) when present on a dir: dir files can only be deleted by their owners, dir owners, or root (t)
+/tmp typically has this sticky bit set
+chmod +t dir
+
+SUID, SGID are potential security risks (particularly SUID root programs) don't set unless doing so is necessary
+Sticky bit is not dangerous this way
+
+DAC, ACLs, and SELinux
+
+DAC: discretionary access control - the above permission info largely ineffecient for proper security
+ACL: access control list - list of users or groups and the permissions they're given (getfacl, setfacl)
+MAC: mandatory access control
+RBAC: role based access control
+SELinux: security enhanced linux 
+	- a Linux kernel security module that provides a mechanism for supporting access control security policies, including MAC
+	- implements RBAC security using the Bell-LaPadula model and either type enforcement or multilevel security
+
+CHMOD
+change a file mode bits
+chmod [options] [mode[,mode...]] filename...
+-R : recursive
+mode: set with a 3 digit octal number or a symbolic mode
+
+chmod 644 file.dat
+
+0 : default, clears special permission bits
+1 : sticky bit permission
+2 : SGID permission
+4 : SUID permission
+^ can be added together, set both SGID + SUID = 6
+
+1. both SUID and SGID (6)
+2. owner bits to make the program readable, writeable, and executable (7)
+3. group bits to make the program readable and executable (5)
+4. other bits to make the program inaccessible (0)
+chmod 6750 program.sh
+
+Symbolic
+3 components
+- code indicating the permission to set to modify (owner, group, other, etc.)
+- symbol indicating add, delete, or set the mode equal
+- code specifying what the permission should be
+
+Permission set code	Meaning		Change Type	Meaning		Permission to Modify	Meaning
+u			owner		+		add		r			read
+g			group		-		remove		w			write
+o			other		=		equal		x			execute
+a			all						X	Execute, only if file is a dir or
+										already has execute permission
+									s			SUID / SGID
+									t			sticky bit
+									u		existing owner's permissions
+									g		existing group's permissions
+									o		existing other permissions
+												
+chmod a+x program
+chmod ug=rw report.txt
+chmod o-rwx program
+chmod g=u report.txt
+chmod g-w, o-rw report.txt
+
+Setting the Default Mode and Group
+UMASK - set file mode creation mask
+input: octal value that represents bits to remove from 777 permissions for dir, 666 permissions for files
+
+umask / created files / created directories
+000 : 666 (rw-rw-rw-) 777 (rwxrwxrwx)
+002 : 664 (rw-rw-r--) 775 (rwxrwxr-x)
+022 : 644 (rw-r--r--) 755 (rwxr-xr-x)
+027 : 640 (rw-r-----) 750 (rwxr-x---)
+077 : 600 (rw-------) 700 (rwx------)
+277 : 400 (r--------) 700 (r-x------)
+
+/etc/profile - typically has umask commands
+Most Linux distributions default to umask of 002 or 022
+
+umask w/o parameters : determine the current umask settings
+0002
+umask w/ octal code : change default file and dir settings
+umask 0002
+
+-S : produces the umask expressed symbolically rather than in octal form
+	u=rwx,g=rwx,o=rx
+
+When written this way you specify the bits you DO want to set
+umask u=rwx, g=rx, o=rx is the equivalent to umask 022
+However, if a permission bit is not set in the default file/dir permissions the specified permission will not be set
+
+NEWGRP - users can change their default group
+newgrp $directory
+
+Changing File Attributes
+
+CHATTR - change file attributes on a Linux file system
+
+No Access Tine Updates
+A : Linux won't update the access time stamp when you access a file (can reduce disk I/O, save laptop battery life)
+
+Append Only
+a : append mode : disables write access to the file except for appending data
+	can be a security feature to prevent accidental / malicious changes to files that record data (log files)
+
+Compressed
+c: causes the kernel to compress data written to the file automatically and uncompress when its read back
+
+Immutable
+i : makes file immutable : file can't be deleted, links to it can't be created, and file can't be renamed
+
+Data Journaling
+j : journal all data written to the file
+	improves recoverability of data written to the file after a crash, can slow performance
+
+Secure Deletion
+s : normal: file deleted > its dir entry is removed and its inode is marked as available for recycling
+	    the data blocks that make up the bulk of the file are not erased
+    secure: file deleted > kernel zeros its data blocks
+
+No Tail-Merging
+t : tail merging: process in which small data pieces at a file's end that don't fill a complete block are merged with similar pieces of data from other files > reduced disk space consumption, good for many small files
+  : setting 't' disables this : desirable if certain non-kernel drivers will read the FS, such as GRUB
+
+chattr can use +/-/= 
+
+chattr +i important.txt
+chattr -i important.txt
+unable to delete the file, even as root - must remove flag prior to deletion
+
+Managing Disk Quotas
+limits enforced by the OS on how many files or how much disk space a single user may consume
+
+Enabling Quota Support
+Requirements
+- kernel support (usually missing in 2.6.x and previous kernels)
+- filesystem support
+
+2 General Quota Support Systems
+v1 : used through 2.4.x kernels 
+v2 : added with 2.6.x kernel series
+
+QUOTA - package, number of utilities, configuration files, and system startup scripts
+then modify /etc/fstab entries for any partitions on which you use quota
+
+/dev/sdc5 /home ext4 usrquota,grpquota 1 1
+
+quotaon : superuser can turn quota on, also quotaoff
+quotacheck : surveys the FS needing quotas and builds current disk usage data records
+	   : aquota.user and aquota.group > both files required by quotacheck > quotacheck -cug
+	   : can also verify and update quota info on quota enabled partitions
+# If quotas were only set for users in the /home dir: would perform the checks and create the quota file
+# quotacheck -cu /home
+
+Setting Quotas for Users
+edquota : set quotas for users, uses a txt editor
+creates /etc/quotatab - controls the specified user's quotas
+edquota user1 : edit user1's quotas
+-t : set the soft limit grace period (per FS basis instead of user)
+   : setting to 0 (an in the inode limits in the preceding example) eliminates the use of quotas for that value
+   : ^ allows users to consume as much disk space or create as many files as they like
+
+edquota : can adjust quotas independently for every FS for which quotas are enabled + separately for every user/group
+-g : group option
+
+repquota : summarizes quota info about the FS you specify
+-a : info on all FS 
+
+quota : 
+-g : displays group quotas
+-q : limits output to FS on which usage is over the limit
+
+Locating Files
+FSSTND: Filesystem Standard
+- standardized programs in /bin and /usr/bin
+- executable files shouldn't reside in /etc/
+- removed changeable files from /usr dir tree, enabling it to be mounted read only (useful security measure)
+
+FHS : Filesystem Hierarchy Standard - based on FSSNTND
+shareable files: may be reasonably shared between computers (user data files, program binary files)
+	if shared, normally shared through an NFS server
+Unshareable files: contain system specific information (configuration files)
+
+		Shareable			Unshareable
+Static		/usr, /opt			/etc, /boot		
+Variable	/home, /var/mail		/var/run, /var/lock
+
+
+/
+root!
+
+/boot
+contains static and unshareable files related to the computer's initial booting
+- GRUB, LILO configuration files, other files necessary for the initial boot
+- recommended to store /boot on itos own partition
+
+/etc
+contains static and unshareable system configuration files
+higher level startup and configuration files control various programs and services
+example systemd in /etc/systemd, SysV in /etc/
+
+/bin
+contains certain critical executable files, such as ls, cp, mount
+accessible to all users, constitute most import commands that ordinary users issue
+- normally won't find big application programs here
+- static files, almost never shared, any potential clients must have their own local /bin dir
+
+/sbin
+contains programs that are normally run only the system admin
+- fdisk, e2fsck
+- static and theoretically shareable, but in practice makes no sense to share it
+
+/lib
+contains program libraries - code that is shared across many programs
+/lib/modules dir contains kernel modules - drivers that can be loaded/unloaded
+- static and theoretically shareable, but in practice makes no sense to share it
+
+/usr
+contains the bulk of a Linux computer's programs
+- shareable and static, can be mounted read only
+- some sub dir like /usr/bin and /usr/lib are similar to their namesakes in the root dir /usr/bin, /usr/lib
+- contain programs and libraries that are not critical to the computer's basic functioning
+
+/usr/local
+contains subdir that mirror the organization of /usr such as /usr/local/bin, /usr/local/lib
+/usr/local dir hosts files that a system admin installs locally - ie packages that are compiled on the target PC
+- the idea is to have an area that's safe from automatic software upgrades when the OS is upgraded
+- after a fresh install of Linux this dir should be largely empyt except for stub dir
+- a binary file in /bin may be overwritten or deleted during a system upgrade...use /usr/local/bin instead to preserve
+
+/usr/share/man
+contains man pages
+/usr/local/share/man alternate: local man pages
+
+/usr/X11R6
+contains files related to the X window system (X for short) the graphic environment
+/usr/X11R6/bin, /usr/X11R6/lib
+- modern distros now use /usr/bin instead
+
+/opt
+contains ready made packages that don't ship with the OS
+dir is similar to /usr/local, some sys admin symlink to a sub dir of /usr/local
+/opt/dell/srvadmin/bin/omreport
+- static and shareable
+
+/home
+contains user data, shareable and variable
+
+/root
+home dir of the root user
+because root account is so critical and system specific this variable dir isn't really shareable
+
+/var
+contains transient files of various types (sys log files, print spool files, mail, news files, etc.)
+
+/tmp
+contains temporary files, usually cleaned, might be wiped on boot
+similar dir exists as part of /var (/var/tmp)
+
+/mnt
+mount removable media devices
+
+/media
+FHS optional, like /mnt but should contain subdir for specific media types (/media/dvd)
+
+/dev
+contains device files - files that function as hardware interfaces
+Linux kernel supports a device FS that enabled dev to be an automatically created vritual FS
+- the kernel and support tools create /dev/entries on the fly to accommodate the needs of specific drivers
+
+/proc
+ususual dir because it does not correspond to a regular dir or partition
+- virtual FS created dynamically by Linux to provide access to certain types of hardware info not in /dev/
+- cat /proc/cpuinfo
+
+Recommended for their own partition:
+/boot
+/home
+/opt
+/tmp
+/usr
+/usr/local
+/var
+
+Recommended to NOT be on their own partition:
+/bin
+/dev
+/etc
+/lib
+/sbin
+
+Locating Files
+
+FIND - search for files in a dir hierarchy
+find [path...] [expression...]
+
+Search by Filename
+-name pattern: find files
+
+Search by Permission Mode
+--perm mode: mode expressed either symbolically or in octal form
+
+-perm -mode: ALL permission bits
+-perm /mode: ANY permission bits
+-perm mode: EXACTLY 
+
+find . -perm 664 : search for files which have read/write permissions for their owner and group, but which other users can read but not write to. Files that match these criteria but have other permission bits set (ie someone can execute the file) will not be matched
+
+find . -perm -664 : search for files which have read/write permissions for their owner and group, but which other users can read without regard to the presence of any extra permission bits (ie the executable bit). This will match a file which had a mode of 0777.
+
+find . -perm /222 : search for files which are writable by somebody (their owner, group, anybody else)
+
+find . -perm /220
+find . -perm /u+w,g+w
+find . -perm /u=w,g=w
+^ all 3x commands do the same thing
+
+
+Search by File Size
+-size n: n is specified in 512 byte blocks, can be modified by tailing the value with a letter code
+	c: bytes
+	k: kilobytes
+
+Search by Group
+-gid GID: searches for files whose group ID (GID) is set to GID
+-group name: locates files whose group name is name
+
+Search by User ID
+-uid UID: searches for files owned by the user hose user ID (UID) is UID
+-user name: searches for files owned by name
+
+Restrict Search Depth
+-maxdepth levels: limit the number of subdir
+
+# search / for backup_* and ignore errors
+find / -name "backup_*" 2>/dev/null
+
+LOCATE - find files by name
+works from a database it maintains, usually a cron job to update daily/weekly
+
+UPDATEDB - update a database for mlocate
+^ configured via /etc/updatedb.conf
+
+WHEREIS - locate the binary, source, and manual pages for a command
+searches for files in a restricted set of locations, such as standard binary file dir, library dir, and man page dir
+- does not search user dir and many other dir
+- quick way to find program executables and related files like doc or config files
+
+whereis ls
+ls: /bin/ls /usr/share/man/man1/ls.1.gz
+
+WHICH - locate a command
+searches path for the command you type and lists the complete path to the first match it finds
+-a : search for all matches
+
+TYPE - tells you how a command you enter will be interpreted
+build-in, external command, alias, etc.
+
+type type
+type is a shell builtin
+
+type cat
+cat is hashed (/bin/cat)
+
+type ls
+ls is aliased to `ls -AlhF --color --group-dir-first`
+
+-t : shortens output to builtin, file, alias, other
+-a : provides a complete list
+
+Booting Linux and Editing Files
+
+Installing Boot Loaders
+GRUB: grand unified boot loader
+LILO: Linux Loader (old)
+
+Computer's firmware reads the boot loader into memory from the disk and executes it
+Boot loader: loads the Linux kernel into memory and starts it
+
+BIOS
+Select a boot device (HDD, USB, CD/DVD, etc.)
+Loads code from the master boot record (MBR) which is the first sector on the disk
+This code is the primary boot loader code
+
+Primary Boot Loader:
+1)
+- examines partition table and locates the partition marked as bootable
+- the primary boot loader then loads the boot sector from that partition and executes it
+- this boot sector contains a secondary boot loader which continues the process by locating an OS kernel, loading, exe
+
+2)
+- locates an OS kernel, loads it, and executes it directly
+- bypasses the secondary boot loader entirely
+
+Windows style: direct the system to boot a kernel from a boot sector installation
+LILO/GRUB: support installation in either the MBR or the boot sector of a boot partition
+
+Drawback of placing LILO/GRUB in a partition's boot sector is that this partition must normally be a primary partition (at least w/ disks that use the MBR partitioning system)
+Most people prefer to put LILO/GRUB in the hard disk's MBR
+
+GPT: GUID Partition Table
+On GPT, GRUB stores part of itself in a special partition (the BIOS boot partition)
+On MBR, the equivalent code resides in the sectors immediately following the MBR
+
+Advanced: redirect the boot process to non-Linux boot sectors and present menus to enable multi OS, kernels
+Chain several bootloaders
+
+Superblock: not really a boot loader conecpt, rather its apart of the FS
+the superblock describes basic FS features such as the FS size and status
+on BIOS based computers the superblock can hold a portion of the boot loader so damage to it can cause boot issues
+
+EFI
+EFI relies on boot loaders stored as files in a disk partition known as the EFI System Partition (ESP)
+- this partition uses the File Allocation Table (FAT) FS
+- typically mounted as /boot/efi
+- boot laoders reside in files with the .efi ext stored in subdir named after the OS or boot loader name
+- /boot/efi/EFI/ubuntu/grub.efi
+- /boot/efi/EFI/suse/elilo.efi
+- does not rely on code stored in the boot sectors on the disk
+- lets your store a separate boot loader for each OS that you install
+- EFI firmware includes its own boot manager to help you select which boot loader to launch
+
+	          ESP
+EFI > | loader1.efi loader2.efi | | kernel1 | | kernel2 |
+
+EFI boot process begins with the boot redirection from the firmware level and employs files in FS rather than boot code hidden in boot sectors
+
+boot loader: loads a kernel into memory and transfers control to it
+boot manager: presents a menu of boot options
+
+EFI must know about the boot loaders installed on the disk's ESP
+- normally done by registering the boot loaders with the firmware
+	- using a utility built into the firmware's own user interface
+	- using a tool such as Linux's efibootmgr
+	- alt: x86-64 EFI implementations use a boot loader called EFI/boot/bootx64.efi on the ESP as a default if no others are registered
+	- use the alt to boot most removable disks
+
+Most popular EFI boot loaders are based on BIOS boot loaders
+- include their own boot mangers features such as chainloading another EFI boot loader
+- computer might run a single EFI boot loader which then chainloads other EFI boot loaders
+- many EFI implementations provide such primitive boot managers that selecting an OS must be done w/ a sep boot prog
+
+Using GRUB Legacy as the Boot Loader
+- really has 2 boot loaders: GRUB legacy and GRUB 2
+
+Configuring GRUB Legacy
+/boot/grub/menu.lst - legacy configuration file
+/boot/grub/grub.conf (used by Fedora, RHEL, Gentoo instead)
+- broken into global and per-image sections
+- legacy supports BIOS but not EFI
+- GRUB numbers drives (instead of /dev/hda, sda) uses (hd0, hd1)
+- GRUB numnbers partitions starting with 0 (instead of Linux 1) (hd0,4) (/dev/sda5)
+- defines its own root partition (where the menu.lst or grub.conf resides)
+
+OPTIONS - Global
+Default OS
+default= : tells grub which OS to boot, default=0 boots first listed OS
+Timeout
+timeout= : defines how long (in seconds) to wait for user input before booting the default
+Background Graphic
+slashimage= : points to a graphics file that is used as the background
+
+OPTIONS - Per Image
+
+Title
+tile = specifies the label to display when the boot loader runs
+
+Grub Root
+root : specifies the location of the grub legacy's root partition
+- this is /boot partition is a separate one exists, otherwise it's usually the linux root /
+
+Kernel Specification
+kernel : location of the linux kernel as well as any kernel options that are passed to it
+ro : mount its root FS read only, it's later remounted read/write
+root= : specifies the Linux root FS
+
+Initial RAM Disk
+initrd : specify an initial RAM disk : holds minimal set of drivers, utils, and config files that the kernel uses to mont its root FS before the kernel can fully access the hard disk
+
+Non Linux Root
+rootnoverify : similar to root, however, legacy won't try to access files on this partition
+- used to specify a boot partition for OSs for which legacy can't directly load a kernel (ie Windows)
+
+Chainloading
+chainloader : pass control to another boot loader
+typically passed a +1 : load the first sector of the taget's OS root partition (usually specified with rootnoverify)
+
+To add a kernel to GRUB:
+1. edit menu.lst or grub.conf
+2. save, on reboot should see the change appear in the menu
+
+Installing GRUB Legacy
+grub-install /dev/sda
+grub-install '(hd0)'
+
+Fedora's EFI enabled version of Grub Legacy : do not use grub-install
+- instead copy grub.efi & grub.conf to a dir on the ESP, such as /boot/efi/EFI/redhat/
+
+Fedora's grub-efi RPM file places grub.efi in the above location ^ by default
+may need to use efibootmgr to add the load to to the EFI's list:
+
+efibootmgr -c -l [[backslash backslash]]EFI[[backslash backslash]]redhat[[backslash backslash]]grub.efi -L GRUB
+
+efibootmgr is a userspace application used to modify the EFI boot manager. Can create, destroy boot entries, change boot order, and change the next running boot option, and more
+
+
+GRUB 2
+much like configuring grub legacy +
+- support for loadable modules for specific FS (insmod)
+- modes for operations
+- conditional logic statements
+	- enabling loading modules or displaying menu entries only if specific conditions are met
+
+Changes from Grub Legacy
+- designed to work with both BIOS and EFI based computers
+- title keyword is replaced by menuentry
+- menu title is enclsoed in quotation marks
+- opern curl brace { follows the menu title, each entry ends with }
+- set keyword precedes the root keyword, equal sign = separates root keyword from partition specification
+- rootnoverify has been eliminated, use root instead
+- partition numbering starts at 1 instead of 0
+- complex partition identification scheme 
+	- (hd0, gpt2) specify 2nd GPT partition should be used
+	- (hd1, mbr3) specify that the 3rd MBR partition should be used
+
+# Should never need to edit this manually, use helper tools
+/boot/grub/grub.cfg or /boot/grub2/
+
+# Edit these instead and then rebuild grub
+1) /etc/grub.d/ 
+^ control particular GRUB OS probers
+^ scan system for particular OSs and kernels and add GRUB entries to /boot/grub/grub.cfg
+^ append custom kernel entries to 40_custom file
+
+2) /etc/default/grub
+^ controls the defaults created by Grub 2 configuration scripts
+^ Example GRUB_TIMEOUT=10
+
+# Rebuild grub after making edits
+update-grub or grub-mkconfig (depends on distro)
+
+^ outputs to STDOUT
+To save changes type update-grub > /boot/grub/grub.cfg
+^ my update-grub in Ubuntu 16.04.3 automatically does this when executed
+
+Alternative Boot Loaders
+- Syslinux
+family of BIOS based boot loaders
+ISOLINUX - boot loader for use on optical discs
+EXTLINUX - boot loader can boot linux from an ext2,3,4 FS
+
+-LILO
+common in the 1990s
+primitive, only works with BIOS based computers
+/etc/lilo.conf
+
+-The Linux Kernel
+since versio 3.3.0 the linux kernel has incorporated an EFI boot loader for x86, x86-64 systems
+- enables the kernel to serve its own boot loader, eliminating the need for Grub 2 or ELILO
+
+-rEFIt
+technically a boot manager, not a boot loader
+popular with Intel based Macs, can be used with UEFI based PCs too
+appears to have been abandoned
+
+-rEFInd
+derived from rEFIt, make it more useful on UEFI based PCs and extend feature set
+- boot manager, not a boot loader
+
+- gummiboot
+open source EFI boot manager, similar to rEFIt and rEFInd, but it is text mode w/ fewer options
+
+Secure Boot
+- enabled > EFI based PC will launch a boot loader only if it's been cryptographically signed with a key whose counterpart is stored in the computer's firmware
+- Linux boot loader must be signed with Microsoft's key (since it's the only one guaranteed to be on most PCs)
+
+Fixing a Damaged Boot Loader Installation
+- boot with the OS installation disc
+- use grub-install to re-install
+- Super GRUB Disk - recovery bootable disk image
+
+Understanding the Boot Processes
+
+kernel ring buffer - certain linux kernel and module log information is stored
+
+dmesg - inspect kernel ring buffer
+
+syslogd - system logger
+syslogd files - /var/log/messages, /var/log/syslog, other files in /var/log
+
+Boot Process
+1. system is given power, special hardware circuit causes the CPU to look at a predetermined address and excecute code stored in that location. The firmware (BIOS or EFI) resides at this location so the CPU runs the firmware
+
+2. firmware performs some tasks: checking for hardware, configuring hardware, and looking for a boot loader
+
+3. when the boot loader takes over from the firmware, it loads a kernel or chainloads another boot loader
+
+4. once the linux kernel takes over, it performs tasks such as initializing devices, mounting the root partition, and finally loading and executing the initial program for your system (by default /sbin/init, gets the PID of 1 as it's the first program to run on the system)
+
+Kernel needs to load drivers to handle hardware, however, those drivers may not be accessible if the drive is not mounted yet. 
+To avoid this Linux uses initramfs. 
+The boot loader mounts the initramfs into memory as a virtual root FS during the boot step for the kernel to use.
+Once the kernel loads the drivers it unmounts the initramfs and mounts the real root FS from the drive
+
+initramfs - initial ram FS - contains necessary modules to access the hardware
+
+The Initialization Process
+init - program to start all of the programs when the linux system starts up
+
+3 populuar initialization process methods
+- Unix System V (also called SysV)
+- systemd
+- Upstart
+
+SysV - uses a series of shell scripts, divided into separate run levels, to determine what program runs at what times
+Each program uses a separate shell script to start and stop the program
+Admins can change the runlevel at any time while the system is running
+
+Negatives - as Linux systems have become more complicated and required more services the runlevel shell scripts became more complicated.
+
+Upstart - main goal was to handle the dynamic environment that hotplug devices cause in Linux
+Uses separate configuration files for each service
+Each service configuration file sets the runlevel in which the service should start
+This way there is just 1 service file that is used for multiple runlevels
+
+Systemd - developed by Red Hat Linux to handle dynamic Linux environments as well
+similar to upstart - uses separate config files to define program behavior
+
+SysV Initialization Process
+The key to this process is runlevels
+init program determines what services to start based on the runlevel of the system
+
+Runlevels - numbered from 0 to 6
+each one is assigned a set of services that should be active for that runlevel
+
+Runlevel Functions
+single-user mode - when booting to Linux use '1', 'S', 's' or 'single' as an option passed to the kernel by the boot loader
+
+single-user mode is simply an available runlevel for your system
+
+Runlevel 0, 1, and 6 - reserved for special purposes
+
+/etc/inittab - defines runlevels and often contains comments explaining
+
+0 - a transitional runlevel (shift computer from one state to another) shuts down the system
+1, s, S - single user mode, typically used for low level sys maintenance (such as resizing partitions)
+2 - full multi-user mode with X running w/ a graphical login (Debian), other distros leave this undefined
+3 - full multi-user mode with a console (nongraphical) login screen (Fedora, Mandriva, Red Hat)
+4 - usually undefined by default and therefore available for customization
+5 - same behavior as runlevel 3 with the addition of having X run w/ an XDM (graphical) login
+6 - reboot the system
+
+Identifying the Services in a Runlevel
+/etc/inittab
+id:runlevels:action:process
+
+Identification Code - id field consists of a sequence of 1-4 char that identifies its function
+Application Runlevels - consists of a list of runlevels for which this entry applies (ex 345) = 3,4,5
+Action to Take - wait (start the process once when entering a runlevel and wait for the process's termination
+respawn (restart the process whenever it terminates (great for login processes))
+Process to Run - process to run for this entry, including any options and arguments that are required
+
+l0: 0: wait:/ etc/ init.d/ rc 0
+l1: 1: wait:/ etc/ init.d/ rc 1
+l2: 2: wait:/ etc/ init.d/ rc 2
+l3: 2: wait:/ etc/ init.d/ rc 3
+l4: 2: wait:/ etc/ init.d/ rc 4
+l5: 2: wait:/ etc/ init.d/ rc 5
+l6: 2: wait:/ etc/ init.d/ rc 6
+
+The SysV Startup Scripts
+/etc/init.d/rc
+/etc/rc.d/rc
+performs the crucial task of running all of the scripts associated with the runlevel
+
+runlevel specific scripts are stored in (? is the runlevel)
+/etc/rc.d/rc?.d
+/etc/init.d/rc?.d
+/etc/rc?.d
+
+rc passes 'start' parameter to all of the scripts with names that begin with a capital 'S'
+rc passes 'stop' parameter to all of the scripts with names that begin with a capital 'K'
+S10network, K35smb, etc.
+
+rc runs the scripts in numeric order
+
+Managing Runlevel Services
+SysV startup scripts in the runlevel dir are sym links back to the original script
+- done so you don't need to copy the same script to each runlevel dir
+
+Utilities to help you manage these links:
+chkconfig, update-rc.d, rc-update
+
+chkconfig --list
+# List services and their applicable runlevels
+sshd  0:off  1:off  2:on  3:on  4:on  5:on  6:off
+
+# specific
+chkconfig --list sshd
+
+# modify runlevel
+# on : activate, off: deactivate, reset: default
+chkconfig --level 23 sshd on
+
+# Add a startup script to the main SysV startup script dir
+=> run chkconfig to register it and add start and stop link in the runlevel dir
+
+# chkconfig inspects the script for special comments to indicate default runlevels
+chkconfig --add nfs-common
+
+# Checking Default Runlevel
+/etc/inittab file look for initdefault
+id:3:initdefault:
+
+# Changing Default Runlevel
+Edit initdefault line and reboot
+If /etc/inittab does not exist, create one that only contains an initdefault line
+
+# Checking Current Runlevel
+runlevel
+N 3
+# N : system has not switched runlevels since booting
+
+# Changing Runlevels on a Running System
+( get more services ie going from a console to a graphical login or to shutdown/reboot)
+init, telinit, shutdown, halt, reboot, and poweroff commands
+
+# Changing Runlevels with init
+init 1 # single user mode
+init 6 # reboot
+
+# Changing Runlevels with telinit - can also take the Q/q option to have the tool read /etc/inittab and read changes
+telinit q
+
+# Changing Runlevels with shutdown
+Better to use shutdown instead of init in multi-user environments
+Shutdown sends a message to all users who are logging into your system
+Prevents other users from logging in during the runlevel change
+Allows you to specify when to effect the runlevel change so that users have time to safely exit
+shutdown now
+
+shutdown hh:mm (24hr clock format, 6:00 (6 AM) 13:30 (1:30 PM) +m for a time 'm' minutes in the future
+-r : reboot
+-H : halt : terminate operation but doesn't power off
+-P : powers it off
+-h : may halt or power off (usually powers off)
+shutdown -r +10 "system is going down for maintenance"
+shutdown -c "never mind"
+
+Using the systemd Initialization Process
+
+Units and Targets
+systemd unit: defines a service or action on the system (consists of a name, type, and configuration file)
+targts: similar to the way SysV uses runlevles, each target represents a group of service that should be running on the system
+
+1. automount
+2. device
+3. mount
+4. path
+5. service
+6. snapshot
+7. socket
+8. target
+
+systemd program identifies units with the format "name.type"
+
+SYSTEMCTL
+list-units : list the units currently loaded in your linux system
+
+boot-efi.mount                                loaded active mounted   /boot/efi
+cron.service                                  loaded active running   Regular background program processing daemon
+unattended-upgrades.service                   loaded active exited    Unattended Upgrades Shutdown
+
+LOAD: reflects whether the unit definition was properly loaded
+ACTIVE: the high level unit activation state, i.e. generalization of SUB
+SUB: the low level unit activation state, values depend on unit type
+
+- instead of changning runlevels to alter what is running you just change targets
+- targets mimic the standard 0 - 6 SysV runlevels
+runlevel0.target
+runlevel1.target
+runlevel2.target...
+runlevel6.target
+
+Configuring Units
+- each unit requires a configuration file that defines what program it starts and how to start it
+- uses /lib/systemd/system/
+
+→ cat ssh.service
+[Unit]
+Description=OpenBSD Secure Shell server
+After=network.target auditd.service (what services should run before ssh service starts)
+ConditionPathExists=!/etc/ssh/sshd_not_to_be_run
+
+[Service]
+EnvironmentFile=-/etc/default/ssh
+ExecStart=/usr/sbin/sshd -D $SSHD_OPTS (what program to start)
+ExecReload=/bin/kill -HUP $MAINPID
+KillMode=process
+Restart=on-failure
+RestartPreventExitStatus=255 (how to reload the program)
+Type=notify
+
+[Install]
+WantedBy=multi-user.target (what target level the system should be in)
+Alias=sshd.service
+
+Target units also use configuration files
+- does not define programs but instead define which service units to start
+
+→ cat graphical.target
+#  This file is part of systemd.
+#
+#  systemd is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU Lesser General Public License as published by
+#  the Free Software Foundation; either version 2.1 of the License, or
+#  (at your option) any later version.
+
+[Unit]
+Description=Graphical Interface
+Documentation=man:systemd.special(7)
+Requires=multi-user.target (what targets are required for this target to start)
+Wants=display-manager.service (what targets or services the target requires to be running)
+Conflicts=rescue.service rescue.target (what targets conflict with this target)
+After=multi-user.target rescue.service rescue.target display-manager.service (what targets should be loaded first)
+AllowIsolate=yes
+
+Setting the Default Target
+/etc/systemd/system/default.target (usually set as a link to a standard target file i.e. graphical.target)
+
+
+SYSTEMCTL
+list-units: displays the current status of all configured units
+default: changes to the default target unit
+isolate: starts the named unit and stops all others
+start name: starts the named unit
+stop name: stop the named unit
+reload name: causes the named unit to reload its configuration file
+restart name: causes the named unit to shut down and restart
+status name: displays the status of the named unit (can pass a PID value instead of a name)
+enable name: configures the unit to start when the computer next boots
+disable name: configures the unit to not start when the computer next boots
+
+→ systemctl status ssh
+● ssh.service - OpenBSD Secure Shell server
+   Loaded: loaded (/lib/systemd/system/ssh.service; enabled; vendor preset: enabled)
+   Active: active (running) since Sat 2018-02-03 06:56:07 CST; 33min ago
+ Main PID: 1033 (sshd)
+    Tasks: 1
+   Memory: 5.7M
+      CPU: 38ms
+   CGroup: /system.slice/ssh.service
+           └─1033 /usr/sbin/sshd -D
+
+Feb 03 06:56:07 LinuxPlus16 systemd[1]: Starting OpenBSD Secure Shell server...
+Feb 03 06:56:07 LinuxPlus16 sshd[1033]: Server listening on 0.0.0.0 port 22.
+Feb 03 06:56:07 LinuxPlus16 sshd[1033]: Server listening on :: port 22.
+Feb 03 06:56:07 LinuxPlus16 systemd[1]: Started OpenBSD Secure Shell server.
+Feb 03 07:00:09 LinuxPlus16 sshd[1124]: Accepted publickey for jteumer from 10.0.2.2 port 52785 ssh2: RSA SHA256:dRZep
+Feb 03 07:00:09 LinuxPlus16 sshd[1124]: pam_unix(sshd:session): session opened for user jteumer by (uid=0)
+
+systemctl isololate rescue.target
+# to go back to the default target for the system
+systemctl default
+
+systemd logging : does not use the standard Linux syslogd log FS, instead has its own log files
+- log files are not stored in text format
+- to view systemd log files you need to use journalctl program
+
+Using the Upstart Initialization Process
+
+upstart: event based replacement for the /sbin/init daemon which handles starting of tasks and services during boot, stopping them during shutdown and supervising them while the system is running
+
+- better handling of today's dynamically changing hotplug hardware (connected, disconnected while sys is running)
+- does not use /etc/inittab
+- replaces runlevel specific SysV startup script directories with scripts in /etc/init/
+
+Using Upstart-Native Methods
+
+/etc/init/name.conf (name is the name of the service)
+
+→ cat ssh.conf
+# ssh - OpenBSD Secure Shell server
+#
+# The OpenSSH server provides secure shell access to the system.
+
+description	"OpenSSH server"
+
+start on runlevel [2345]
+stop on runlevel [!2345]
+
+**omitted**
+
+after changing name.conf, use the stop/start command
+initctl reload: before changing runlevel you should type this command to have Upstart reread its config files
+
+Using SysV Compatibility Methods
+- runs SysV startup scripts in the usual locations (/etc/rc.d/rc?.d, /etc/init.d/rc?.d, /etc/rc?.d, etc.)
+
+Editing Files with VI
+
+1. Command Mode: accepts commands, usually entered as single letters (i: insert, a: append, o: new line below)
+
+2. Ex Mode: to manipulate files (include saving current file and running outside programs)
+enter ex mode from command mode by typing a colon(:) typically followed by the name of the ex-mode command
+
+3. Insert Mode: enter text, use Esc key to exit insert mode and return to command mode
+
+Exam Essentials
+
+Grub legacy uses menu.lst or grub.conf in /boot/grub
+file contains global and per-image options
+use grub-install to install the bootloader
+
+Grub2 uses /boot/grub/grub.conf which you shouldn't edit directly
+use automatic configuration scripts and set system specific defaults in /etc/defaults/grub and files in /etc/grub.d/
+still use grub-install
+
+Boot Processes
+1. CPU runs the firmware
+2. firmware loads and runs a boot loader
+3. boot loader loads and runs secondary boot loaders (if needed) and the Linux kernel
+4. Linux kernel laods and runs the initial system program (init)
+5. init starts the rest of the system services via startup scripts (SysV, Upstart, systemd, etc.)
+
+BIOS based computers look for boot loaders in various boot sectors, including drive MBR or the boot sector of a disk partition or USB flash drive
+EFI based computers look for boot loaders in files on the ESP
+
+dmesg command prints out logs from the kernel ring buffer which holds boot time and other kernel messages
+use use /var/log/messages and other files in /var/log
+
+init program is responsible for starting many programs and services on your Linux operating system
+
+SysV - uses a default runlevel specified with a line like 
+id:2:initdefault in the /etc/inittab file
+chkconfig, update-rc.d, ntsysv, and systemctl to change which services are started when switching to specifc runlevels
+
+runlevel 0: shutdown
+runlevel 1: single user mode
+runlevel 3,4,5: common user runlevels on RH, other distros
+runlevel 2: common user runlevel on Debian
+runlevel 6: reboot
+
+Change SysV runlevels:
+init, telinit can be used to change runlevels
+shutdown, halt, power, reobot also useful when shutting down, rebooting, or switching to single user mode
+
+Systemd init system uses units and targets to control services, default target specified by:
+/lib/systemd/system/default.target which is a link to a target file in /lib/systemd/system
+
+use systemctl to start/stop services as well as change the target level of the system

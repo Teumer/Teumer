@@ -2503,7 +2503,112 @@ net.ipv4.ip_forward = 1
 /etc/sysconfig/sysctl:
 IP_FORWARD
 
-ifup and ifdown commands: todo :)
+GUI Configuration Tools
+Fedora / RHEL = Network Configuration (system-config-network)
+SUSE = YaST (both text mode and GUI)
+
+IFUP and IFDOWN commands:
+
+ - implemented as scripts that consult the configuration files
+
+# ifup eth0
+Determing IP information for eth0...done
+
+# ifdown eth0
+take down interface
+
+eth0 will be fully configured including routing information
+
+sudo ifconfig enp0s8 down
+sudo ifconfig enp0s8 up
+sudo dhclient enp0s8
+
+_____________________
+Configuring Hostnames
+_____________________
+
+DNS
+Add an entry for your system to your network's DNS server
+Alternate: configure remote systems' /etc/hosts file to include your system
+
+Local Computer
+`hostname` command
+
+# must run as root
+hostname nessus.example.com
+
+`domainname` - sets the domain name as used by Network Information System (NIS)
+`dnsdomainname` - sets the domain name as used by DNS
+
+# Debian
+/etc/hostname
+/etc/HOSTNAME
+
+# Fedora
+/etc/sysconfig/network
+
+route -n
+
+0.0.0.0 - default
+
+jteumer@ubuntu:~$ route -n
+Kernel IP routing table
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+0.0.0.0         10.0.3.2        0.0.0.0         UG    0      0        0 enp0s8
+0.0.0.0         10.0.2.2        0.0.0.0         UG    100    0        0 enp0s3
+10.0.2.0        0.0.0.0         255.255.255.0   U     0      0        0 enp0s3
+10.0.2.2        0.0.0.0         255.255.255.255 UH    100    0        0 enp0s3
+10.0.3.0        0.0.0.0         255.255.255.0   U     0      0        0 enp0s8
+
+Gateway
+10.0.3.2
+10.0.2.2
+
+sudo ifconfig enp0s8 down
+sudo ifconfig enp0s8 up $address netmask $mask
+sudo route add default gw 10.0.3.2
+
+Diagnosing Network Connections
+ping
+traceroute
+tracepath
+netstat
+tcpdump
+
+Test basic connectivity - ping
+sends a simple ICMP packet to the system you name (via IP address or hostname) and waits for a reply
+
+ping6 for IPv6
+
+ping6 fe80::a00:27ff:fe21:c899
+connect: Invalid argument
+
+The problem is that the system doesn't know which interface to use to access the link-local address
+To solve, add the interface name after the link local address seperated by a percent sign
+
+ping6 fe80::a00:27ff:fe21:c899 %enp0s8
+
+Tracing a Route - traceroute
+- sends a series of 3x packets to each computer between your system and a specified target system
+
+traceroute -n 8.8.8.8
+
+-n option : display target computers' IP address rather than their hostnames
+            can speed up the process, particulary if you are having DNS issues
+
+jteumer@ubuntu:~$ traceroute -n 8.8.8.8
+traceroute to 8.8.8.8 (8.8.8.8), 30 hops max, 60 byte packets
+ 1  10.0.3.2  0.386 ms  0.226 ms  0.139 ms
+ 2  172.16.24.1  9.888 ms  9.526 ms  9.721 ms
+ 3  192.168.21.19  9.850 ms  10.288 ms  11.172 ms
+ 4  192.168.21.18  10.285 ms  11.652 ms  11.555 ms
+ 5  50.238.15.37  12.123 ms  12.060 ms  12.100 ms
+ 6  96.108.34.1  11.000 ms  11.085 ms  11.014 ms
+
+traceroute6 for IPv6
+- only can trace global addresses
+- link-local addresses are nonroutable
+
 
 
 

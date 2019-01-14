@@ -2609,6 +2609,188 @@ traceroute6 for IPv6
 - only can trace global addresses
 - link-local addresses are nonroutable
 
+some routers are configured to block traceroute traffic
+
+Checking network status
+
+___________________
+netstat
+___________________
+
+--interface -i: obtain info about your network interfaces (similar to ifconfig)
+
+jteumer@ubuntu:~$ netstat -i enp0s3
+Kernel Interface table
+Iface      MTU    RX-OK RX-ERR RX-DRP RX-OVR    TX-OK TX-ERR TX-DRP TX-OVR Flg
+enp0s3    1500      813      0      0 0           649      0      0      0 BMRU
+lo       65536      175      0      0 0           175      0      0      0 LRUo
+
+
+--route -r: obtain a routing table listing (similar to route)
+
+jteumer@ubuntu:~$ netstat -n -r
+Kernel IP routing table
+Destination     Gateway         Genmask         Flags   MSS Window  irtt Iface
+0.0.0.0         10.0.2.2        0.0.0.0         UG        0 0          0 enp0s3
+10.0.2.0        0.0.0.0         255.255.255.0   U         0 0          0 enp0s3
+10.0.2.2        0.0.0.0         255.255.255.255 UH        0 0          0 enp0s3
+
+
+--masquerade -M: obtain info about connections mediated by Linux's NAT features
+    NAT enables a Linux router to hide a network behind a single IP address
+        - great way to stretch limited IPv4 addresses
+
+jteumer@ubuntu:~$ netstat -M
+netstat: no support for `ip_masquerade' on this system.
+
+
+--program -p: which attempts to provide info about programs that are using network connections
+
+jteumer@ubuntu:~$ netstat -p
+(Not all processes could be identified, non-owned process info
+ will not be shown, you would have to be root to see it all.)
+Active Internet connections (w/o servers)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name
+tcp        0      0 ubuntu:ssh              _gateway:52808          ESTABLISHED -
+Active UNIX domain sockets (w/o servers)
+Proto RefCnt Flags       Type       State         I-Node   PID/Program name     Path
+unix  2      [ ]         DGRAM                    20172    1196/systemd         /run/user/1000/systemd/notify
+unix  2      [ ]         DGRAM                    13752    -                    /run/systemd/journal/syslog
+
+
+without any params: returns info about open ports and the systems to which they connect
+
+jteumer@ubuntu:~$ netstat
+Active Internet connections (w/o servers)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State
+tcp        0      0 ubuntu:ssh              _gateway:52808          ESTABLISHED
+Active UNIX domain sockets (w/o servers)
+Proto RefCnt Flags       Type       State         I-Node   Path
+unix  2      [ ]         DGRAM                    20172    /run/user/1000/systemd/notify
+unix  2      [ ]         DGRAM                    13752    /run/systemd/journal/syslog
+
+
+--all -a: used in conjunction with others
+    display info about the ports that server programs open to listen for network connections
+    - in addition to already opened connections
+
+jteumer@ubuntu:~$ netstat -a
+Active Internet connections (servers and established)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State
+tcp        0      0 localhost:domain        0.0.0.0:*               LISTEN
+tcp        0      0 0.0.0.0:ssh             0.0.0.0:*               LISTEN
+tcp        0      0 ubuntu:ssh              _gateway:52808          ESTABLISHED
+tcp6       0      0 [::]:ssh                [::]:*                  LISTEN
+udp        0      0 localhost:domain        0.0.0.0:*
+udp        0      0 ubuntu:bootpc           0.0.0.0:*
+raw6       0      0 [::]:ipv6-icmp          [::]:*                  7
+Active UNIX domain sockets (servers and established)
+Proto RefCnt Flags       Type       State         I-Node   Path
+unix  2      [ ]         DGRAM                    20172    /run/user/1000/systemd/notify
+unix  2      [ ACC ]     SEQPACKET  LISTENING     13744    /run/udev/control
+
+
+Examining Raw Network Traffic
+___________________
+tcpdump
+___________________
+
+packet sniffer - which is a program that can intercept network packets and log them/display them
+    - examine data in raw form
+
+must be run as root
+
+summarizes what it's doing and then begins printing lines
+    - prints lines indefinitely
+    - one for each packet that it monitors
+    - includes: time stamp, stack identifier (IP), origin system name or IP address and port, packet info
+
+-c: count, display n packets and then quit
+-A: display packet contents in ASCII
+-D: display a list of interfaes to which tcpdump can listen
+-n: display all addresses numerically
+-v, -vv, -vvv: display additional packet information
+-w file: write captured packets to the specified file
+
+jteumer@ubuntu:~$ sudo tcpdump -c 4 -n
+tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
+listening on enp0s3, link-type EN10MB (Ethernet), capture size 262144 bytes
+12:37:24.459941 IP 10.0.2.15.22 > 10.0.2.2.52808: Flags [P.], seq 2808043719:2808043907, ack 2042015, win 40368, length 188
+12:37:24.460289 IP 10.0.2.2.52808 > 10.0.2.15.22: Flags [.], ack 188, win 65535, length 0
+12:37:24.460480 IP 10.0.2.15.22 > 10.0.2.2.52808: Flags [P.], seq 188:440, ack 1, win 40368, length 252
+12:37:24.460894 IP 10.0.2.15.22 > 10.0.2.2.52808: Flags [P.], seq 440:580, ack 1, win 40368, length 140
+4 packets captured
+7 packets received by filter
+0 packets dropped by kernel
+
+___________________
+telnet
+___________________
+program and protocol is mainly a remote login tool
+entirely unencrypted: general rule is to remove Telnet server and never use telnet client
+tcp only, no UDP
+
+telnet 192.168.1.1
+telnet 192.168.1.1 25 (port)
+
+___________________
+ftp
+___________________
+enables you to transfer files between systems
+entirely unencrypted, use SFTP instead
+get, mget
+put, mput
+ls, dir, cd, delete, quit, bye, help, ?
+for public / no login setup:
+    Username: anonymous
+    Password: any or blank
+
+for a web browser: use ftp://downloads.example.org
+
+Exam Essentials:
+
+describe the information needed to configure a computer on a static IP network
+1. IP address
+2. Netmask (network mask or subnet mask)
+3. Gateway
+4. DNS
+- #1,2 are required for basic networking
+- #3,4 are required for Internet use / most DNS hostnames
+
+determine when using /etc/hosts rather than DNS makes the most sense
+/etc/hosts provides a static mapping of hostnames to IP addresses on a single computer
+manageable for a small network
+use an actual DNS server to handle local name resolution if more than a few
+
+summarize tools you can use to translate between hostnames and IP addresses
+nslookup can perform these translations in both directions using either CLI or interactive modes
+- has been deprecated 
+- use `host` for simple lookups
+- use `dig` for more complex tasks
+
+describe the function of network ports
+- enable packets to be directed to specific programs
+- each network enabled program attaches itself to one or more ports
+        - sending data from that port
+        - and receiving data directed to the port
+
+explain when you should use static IP addresses or DHCP
+static: when a network lacks a DHCP server or when a computer shouldn't be configured by that server
+            - the computer itself may be the DHCP server
+dhcp: easier to setup on the client, only works with an actual DHCP server system
+
+explain what the route command accomplishes
+displays or modifies the routing table
+tells Linux how to direct packets on their destination IP address
+
+describe some basic network diagnostic tools
+-ping tests basic network connectivity
+-traceroute, -tracepath helps you localize where on a route between 2 systems a problem exists
+-netstat reports a wide variety of info about your network config
+-tcpdump provides detailed info about the network packets 'seen' by a computer, verify send & receive
+
+
+Review Questions
 
 
 

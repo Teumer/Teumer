@@ -77,3 +77,39 @@ can accept different file types (plain txt, PostScript, graphics, etc.) and prin
 
 20. B
 
+
+Network Review Questions
+1. A, B, E
+2. B
+3. C
+4. D
+5. IMAP: D?
+21: FTP
+25: SMTP
+110: POP3
+443: HTTPS
+6. C?, E
+dhcpd is the Linux DHCP server
+7. B, C
+8. A
+9. B
+10. A, B
+11. E
+12. C
+13. B? REVISIT THIS ONE
+A:Both global and link-local IPv6 addresses can use the system mac address
+C: fee network address identifies a site-local address but not a link-local address
+D: Address starting with 2001 would be a normal global address
+14. C
+15. A, E  > A, D
+using telnet for remote administration is risky because unencrypted
+16. B
+172.25.78.89/24 IP
+172.25.79.1 GW
+10.24.89.201 DNS
+17. E
+18. E
+19. B
+20. D
+
+

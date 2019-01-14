@@ -2790,9 +2790,46 @@ describe some basic network diagnostic tools
 -tcpdump provides detailed info about the network packets 'seen' by a computer, verify send & receive
 
 
-Review Questions
 
+Chapter 9
+Writing Scripts, Configuring Email, and Using Databases
 
+Environment Variables
+
+HOSTNAME=ubuntu
+export HOSTNAME
+
+Use export to make the variable available to subshells
+
+when setting an environemt variable via the terminal command it is not persistent
+
+To see all of the environment variables, use:
+- env
+- set
+- printenv
+
+COMMON ENVIRONMENT VARIABLES
+
+DISPLAY: identifies the display used by the X windows server
+         usually set to :0.0
+         which indicates the 1st display on the current computer
+         run multiple X sessions > get a diff display number
+            :0.0 for 1st
+            :1.0 for 2nd, etc
+            :machine4.luna.edu:0.0
+
+EDITOR: some programs launch the defined editor program when they need to call a text editor
+        best to set to a text mode editor bc GUI editors may cause problems if they're called
+            from a program that was launched from a text mode login
+
+HISTSIZE: variable determines the number of commands that will be saved in your history file
+
+HOME: variable points to your home directory
+      some programs use this to look for config file or as a default location to store files
+
+HOSTNAME: current TCP/IP hostname of the computer
+
+LANG: :) todo
 
 
 

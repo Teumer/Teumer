@@ -2829,12 +2829,108 @@ HOME: variable points to your home directory
 
 HOSTNAME: current TCP/IP hostname of the computer
 
-LANG: :) todo
+LANG: holds your current language (locale)
+
+LD_LIBRARY_PATH: directory of library files
+
+LOGNAME: holds your username when you are logged in
+
+MAIL: holds the location of the user's mail spool, usually /var/spool/mail/username
+
+PAGER: if set, variable determines the pager to use for output for programs (ie man)
+
+PATH: very important variable
+- sets the path for a session
+    - colon delimited list of directories in which linux serarch for executable programs
+- example: /bin:/usr/bin
+    - type ls
+        - looks for ls in these 2 directories
+    - else command not found
+
+PS1: default prompt in bash, value is usually set in /etc/profile
+PWD: present working directory
+SHELL: holds the path to the current command shell
+TERM: name of the current terminal type
+    - determine which commands the terminal supports
+        - for moving a text mode cursor and displaying text effects like text mode exitors
+TZ: time zone
+USER or USERNAME: current username
+
+Using aliases
+alias ls
+unalias ls
+
+Modifying Shell Config Files
+
+Type        Login File Location     Non-Login file location
+Global      /etc/profile            /etc/bashrc
+            /etc/profile.d (files)  /etc/bash.bashrc
+
+User        ~/.bash_login           ~/.bashrc
+            ~/.profile
+            ~/.bash_profile
+
+Order of priority
+~/.bash_profile
+~/.bash_login
+~/.profile
+
+/etc/skel directory
+- holds files that are copied to individual users' home dir when accounts are created
+- usually local bash startup files
+- only affects new accounts
+
+Logout scripts (ie ~/.bash_logout)
+- may not work well when logged in to several sessions
+
+/etc/inputrc
+~/.inputrc - user override
+- keyboard customization and setting terminal behavior
+
+`bind -p` to list current key bindings
+
+the meta key is usually the Esc key on x86 or x86-64 systems
+
+universal-argument action is one of many possible actions defined by the readline software library
+- readline one of basic text mode input linux libraries
+
+Writing Scripts
+
+#!/bin/bash
+- shebang, hashbang, hashpling, poundbang
+- first 2x characters indicates a script
+
+/bin/sh
+- on most systems this is a symbolic link that points to /bin/bash
+    - on my ubuntu vm it's dash
+
+DANGEROUS to go alone, take this
+DANGEROUS to use the /bin/sh in your shell scripts
+
+Running a Script
+
+# user add execute priv
+chmod u+x myscript.sh
+or
+`bash myscript.sh`
+-does not require execution priv to run the script
+-but it does create a subshell to run the script
 
 
+###################################################
+#!/bin/bash
 
+# show process forest
+ps -o pid -o ppid -o cmd --forest
 
+# give status
+echo Done with Script
 
+-o optons will display the process ID (PID)
+and the parent process ID (PPID)
+along with the commands (CMD) being executed
+--forest option shows parent processes graphically
+###################################################
 
 
 

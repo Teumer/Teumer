@@ -2913,6 +2913,8 @@ Running a Script
 chmod u+x myscript.sh
 or
 `bash myscript.sh`
+- run the script in the current directory
+    rather than searching the current path
 -does not require execution priv to run the script
 -but it does create a subshell to run the script
 
@@ -2931,6 +2933,66 @@ and the parent process ID (PPID)
 along with the commands (CMD) being executed
 --forest option shows parent processes graphically
 ###################################################
+
+jteumer@ubuntu:~$ bash script.sh
+# creates a subshell to run the script
+  PID  PPID CMD
+ 5334  5333 -bash
+17211  5334  \_ bash script.sh
+17212 17211      \_ ps -o pid -o ppid -o cmd --forest
+Done with Script
+
+jteumer@ubuntu:~$ ./script.sh
+# tells linux to run the script in the current directory
+# also creates a subshell to run the script
+  PID  PPID CMD
+ 5334  5333 -bash
+17213  5334  \_ /bin/bash ./script.sh
+17214 17213      \_ ps -o pid -o ppid -o cmd --forest
+Done with Script
+
+jteumer@ubuntu:~$ source script.sh or .(dot) script.sh or . $script-name (no extension)
+# a subshell is not created to run the script
+  PID  PPID CMD
+ 5334  5333 -bash
+17231  5334  \_ ps -o pid -o ppid -o cmd --forest
+
+jteumer@ubuntu:~$ exec ./script.sh
+# does need the execute permission set
+# exec will exit the current bash shell when it is done running the script
+  PID  PPID CMD
+ 5334  5333 /bin/bash /home/jteumer/script.sh
+17237  5334  \_ ps -o pid -o ppid -o cmd --forest
+Done with Script
+Connection to 127.0.0.1 closed.
+
+sourcing method:
+    causes the script to run in the current shell instead of a subshell
+    will have access to environment variables set in the calling shell
+        this is true even when you haven't exported them
+    without sourcing only environment variables that you explicitly export become available
+
+    if you source a script and change an environment variable that variable
+        will remain changed in the calling shell
+
+    running a script without sourcing imposes overhead costs (normally negligible)
+        but if a script calls itself recursively or many other scripts
+            may be beneficial to source scripts to improve performance
+
+    sourcing a script causes it to execute in the shell's language rather than
+        using the shell language specified on the shebang line
+
+Positional Parameter Variables:
+$0 name of script
+$1 first parameter
+$2 second parameter
+
+
+
+
+
+
+
 
 
 

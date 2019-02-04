@@ -2988,11 +2988,124 @@ $1 first parameter
 $2 second parameter
 
 
+while $true
+until $true
+
+shift
+    removes the value of the $1 parameter
+    moves the $2 parameter value to $1
+    moves the $3 parameter value to $2
+    etc
+
+when shift has passed the last parameter then $1 variable becomes null
+
+good idea to test for $1 being null to allow clean handling of passed parameters
+
+seq - sequence
+
+seq 3
+1
+2
+3
+
+seq 0 10 100
+0
+10
+20
+30
+40
+50
+60
+70
+80
+90
+100
 
 
+break
+    if the command does not work successfully the || double pipe
+    will execute break - causing the loop to terminate
+
+dte || break
+
+useradd $username || err_function
+
+function () {
+    function here
+}
+
+err_function () {
+    echo "Error!"
+    exit 1
+}
+
+EMAIL
+
+SMTP
+    simple mail transfer protocol
+    designed as a push mail proto
+    smtp servers are also known as MTAs
+
+final stage often employs a pull mail protocol
+POP
+    post office protocol
+
+IMAP
+    internet message access protocol
+
+MTA
+    mail transfer agents
+    looks up a recipient system and sends the message to that computer
 
 
+basic steps for creation, transfer, and delivery of email
+1 user creates an email message using an email client, called a Mail User Agent (MUA)
+2 the MUA gives the email to a Mail Submission Agent (MSA)
+3 the MSA then hands off the email to a Mail Transfer Agent (MTA)
+4 the MTA is responsible for transferring the email to the Mail Delivery Agent (MDA)
+5 the MDA handles delivering the email to the Mail User Agent (MUA)
+6 the recipient user then reads the email message via the MUA
 
+Choosing Email Software
 
+Sendmail
+    was for many years the dominant email server package on the internet
+    still very popular
+    very powerful but can be hard to configure bc of it configuration file formats
+    uses a single program that does everything
 
+Postfix
+    designed as a modular replacement for sendmail
+    uses multiple programs
+    improves security - at least in theory
+    tends to be easier to configure
+    become the default email server on many linux distros
+
+Exim
+    similar to sendemail but has a much simpler configuration file format
+    a few linux distros use this as the default
+
+Qmail
+    modular server with security as a major design goal
+
+`mail` command
+# send
+mail [-v] [-s subject] [-c cc-address] [-b bcc-address] to-address
+
+# receive
+mail [-v] [-f [name] | -i user]
+
+mail command does not support reading mail stored on remote servers
+    and read via POP or IMAP
+    only supports the local email queue
+
+-v verbose
+-s subject
+-c carbon copy
+-b blind copy
+
+apt install mailutils -y
+to read a message type its number
+delete by pressing d
+or reply by pressing r
 

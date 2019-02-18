@@ -3109,3 +3109,140 @@ to read a message type its number
 delete by pressing d
 or reply by pressing r
 
+Checking the Email Queue
+
+`mailq` - postfix to sendmail compatibility interface
+main tool to help in email queue management
+
+just running mailq will display the contents of the email queue on all systems
+or sendmail -bp
+
+sendmail -q : clear queue
+
+Redirecting Email
+
+email aliases enable one address to stand in for another one
+
+# format
+name: address1[,address2[,...]]
+
+name=local name such as postmaster
+address=
+1. local account name to which the messages are forwarded
+2. local file name in which messages are stored - denoted by leading slash
+3. command through which messages are piped - denoted by a leading vertical bar character
+4. file name whose contents are treated as a series of addresses
+    - denoted by a leading :include: string or a full email address
+
+/etc/aliases
+# See man 5 aliases for format
+postmaster: root
+
+`newaliases` command
+after editing /etc/aliases run this command to compile file into a binary file
+
+alternate: edit ~/.forward file in a user's home directory
+should contain only the new address
+    username on currect computer or entire email address on another computer
+can't be used to setup aliases for nonexistent accounts
+    or for accounts that lack home directories
+can also be changed or deleted by the account owner - might not be desirable
+
+
+Managing Data with SQL
+
+structured query language
+
+MySQL
+- owned by oracle
+- released under GPL
+- included in many linux distros
+
+PostgreSQL
+- released under BSD
+- available as multiple packages in most linux distros
+- likely will need to install a client, server, support packages
+        - same as MySQL
+
+SQLite
+- library that supports SQL
+    - NOT a standalone database
+- lightweight
+
+
+Relational Databases
+- each row (or tuple) represents a single object or other item
+- each column (or attribute or field) represents a specific feature
+- combination of rows/columns is referred to as a table
+- table data is unordered
+
+domain / data type: restriction on data entry
+
+Data Type Name          Purpose
+INTEGER INT             4 byte integer value
+SMALLINT                2 byte integer value
+DECIMAL                 Precision storage of decimal values
+                            (10,2) number of digits - 10, number of digits after decimal point - 2
+                            use for currency
+NUMERIC                 Precision storage of decimal values
+FLOAT                   Floating point number
+                            can hold real (non integer) numbers
+                            can introduce rounding errors with currency
+DOUBLE PRECISION        Floating point number w/ twice the precision of FLOAT
+DATETIME                A date and time
+DATE                    A date
+TIME                    A time, in HH:MM:SS format (time of day or period of time)
+CHAR                    One or more characters
+                            needs to be exactly that number of characters
+VARCHAR                 A variable number of characters
+                            can be up to and including that number of characters
+ENUM                    An enumerated list, such as small, medium, large
+SET                     Data that may have zero or more values
+                        as in any of the set of nuts, sprinkles, fudge, and cherry for toppings
+mysql commands
+- terminated by semicolons
+
+mysql> show databases;
+
+mysql> create database test;
+mysql> use test;
+mysql> show tables;
+empty set
+
+mysql> create table objects (
+name        VARCHAR(30),
+color       VARCHAR(20),
+size        FLOAT,
+hardness    ENUM('soft', 'medium', 'hard),
+value       DECIMAL(10,2));
+
+mysql> describe objects;
+summary of the fields you just created for the table
+
+
+Storing Data
+
+mysql> insert into objects
+values('lizard', 'green', 6, 'soft', 10.00);
+
+mysql> select * from objects;
+mysql> 
+mysql> 
+mysql> 
+mysql> 
+mysql> 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

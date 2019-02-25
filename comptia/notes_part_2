@@ -3226,23 +3226,102 @@ mysql> insert into objects
 values('lizard', 'green', 6, 'soft', 10.00);
 
 mysql> select * from objects;
-mysql> 
-mysql> 
-mysql> 
-mysql> 
-mysql> 
+
+#Update record
+mysql>  UPDATE objects SET size=5 WHERE name='lizard';
+
+update table name objects
+set the size field to 5
+where: specify which row to change
+change the data for all rows for which the name field is lizard
+
+you must provide enough criteria to identify the column uniquely 
 
 
+Retrieving Data
+
+SELECT field(s) FROM table [ WHERE conditions ] [ ORDER BY field ]
+
+mysql> SELECT value,color FROM objects;
+value   |   color 
+10.00       green
+200.00      green
+5.00        white
+1.00        red
+0.10        yellow
+
+Exact Matches
+mysql>  SELECT * FROM objects WHERE color='green';
+returns 2x entries for green objects (lizard and tree)
+
+Numeric Tests
+mysql> SELECT * FROM objects WHERE size>10;
+
+Alphabetic Tests
+mysql> SELECT * FROM objects WHERE name>'b';
+retrieve records where the name begins with a 'b' or later letters in the alphabet
+still matches 'b' with the greater than operator
+
+Multiple Tests
+mysql> SELECT * FROM objects WHERE hardness='soft' AND value>7.50;
+
+Return the data as an ordered list by specifying a field name after the ORDER BY keyword
+mysql> SELECT * FROM objects WHERE hardness='soft' ORDER BY value;
 
 
+Combining Data from Multiple Tables
+- tables must have at 1 matching field
+- matching field is used to bind the 2x tables together
+- each table must have 1 field whose value uniquely identifies each row
+- PRIMARY KEY: uniquely identifying field
 
 
+Combine Tables
+
+First Method: SELECT
+
+mysql> SELECT objects.name, objects.color, locations.location
+FROM objects, locations
+WHERE objects.name=locations.name AND objects.color='green';
+
+name        color       location
+tree        green       backyard
+lizard      green       living room
+
+Second Method: JOIN
+
+mysql> SELECT objects.name, objects.color, locations.location 
+FROM objects
+JOIN locations
+WHERE objects.name=locations.name AND objects.color='green';
 
 
+GROUP BY Command
+- used in conj with math operators to restrict the selection to specified columns
+    such as SUM()
+
+- want to know the total value of all objs in the database, grouped by obj type
+
+mysql> SELECT objects.name, objects.value, SUM(value)
+FROM objects, locations
+WHERE locations.name=objects.name
+GROUP BY value;
+
+omitting group by clause produces a MySQL error
 
 
+DELETING DATA
 
+DELETE FROM table WHERE conditions
 
+mysql> DELETE FROM locations
+WHERE name='tree' AND location='backyard';
 
+*try using SELECT prior to deleting data to avoid accidentally deleting too much data
 
+Delete all of data from table WITHOUT deleting table
+mysql> DELETE * from locations;
+
+Completely eliminates the locations table
+mysql> DROP TABLE locations;
 

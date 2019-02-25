@@ -113,3 +113,39 @@ using telnet for remote administration is risky because unencrypted
 20. D
 
 
+Chapter 9
+Writing Scipts, Configuring Email, and Using Databases
+Review Questions
+
+1 D
+2 A
+3 E
+4 C
+5 E ...A is for current shell
+  E is not a valid bash command
+  Actually A,C
+  
+6 E
+7 A, D
+8 B
+9 C
+10 E
+11 B, C
+12 A, B, D
+13 B
+14 C
+15 mail -s "Error" -c abort < /tmp/msg root
+  E
+  Actually B
+  -s subject
+  -c carbon copy cc:
+  < input redirection to message
+16 D
+17 /etc/aliases
+    root: jody
+    B
+18 B
+19 A, D ...what is wrong with C?
+20 C
+
+

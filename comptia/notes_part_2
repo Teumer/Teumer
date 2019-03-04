@@ -3325,3 +3325,161 @@ mysql> DELETE * from locations;
 Completely eliminates the locations table
 mysql> DROP TABLE locations;
 
+
+
+Chapter 10: Securing Your System
+
+1.110.1 Perform security administration tasks
+1.110.2 Set up host security
+1.110.3 Securing data with encryption
+
+Using super server restrictions
+
+Linux has 2x primary super daemons
+- inetd
+    - security is handled by a package called TCP wrappers
+    - legacy super daemon
+    - most likely you will never run into it
+    - deprecated, no longer installed
+- xinetd
+    - security features are built into xinetd itself
+
+Setting Up inetd
+- /etc/inetd.conf file
+- /etc/inetd.d/*
+
+typical line in file:
+ftp stream tcp nowait root /usr/sbin/tcpd /usr/sbin/in.ftpd -l
+
+line breakdown
+
+service name: 1st field (ftp) name of the service as it appeared in /etc/services file
+
+socket type: told the system what type of connection to expect
+    - stream: reliable 2 way connection
+    - dgram: less reliable connection w less overhead
+    - raw: low level connection to the network
+    - various others
+
+protocol: TCP/IP layer protocol used, usually TCP or UDP
+
+wait/no wait: for dgram socket types it:
+    nowait: specified whether the server connected to its client and freed the socket
+    wait:   or^ processed all of its packets and then timed out
+    for other socket types servers would specify nowait for this field
+
+user: username used to run the server (root, nobody)
+    - some required root access
+
+server name: the server's filename
+    - in example this was /usr/sbin/tcpd
+
+parameters: everything after server name consisted of parameters that were passed to the server
+    - if you used TCP wrappers you would pass the name of the true target server
+        (/usr/sbin/in.ftpd)
+
+# : can be used to comment in /etc/inetd.conf
+
+# /etc/init.d/inetd restart
+restart inetd super daemon after modifying .conf
+
+
+Controlling access via TCP wrappers
+- TCP wrappers provides a library known as libwrap
+- older TCP wrappers packages used w inetd provided a program known as tcpd
+     - checked whether a client was authorized to access the server
+        - if the client had this authorization tcpd called the server program
+
+Even though inetd has been deprecated, TCP wrappers is still available for use on Linux
+example: FTP server vsftpd uses TCP wrappers
+ldd NetworkServiceDaemon | grep libwrap 
+
+TCP Wrappers is configured through 2 files:
+/etc/hosts.allow
+/etc/hosts.deny
+
+daemon-list: client-list
+
+daemon-list: list of servers using the names for the servers that appear in /etc/services
+    - can also use wildcards (ALL : for all servers)
+
+client-list: list of computers to be granted or denied access to the specified daemons
+    - can specify by name or IP address
+    - can also specify a network w a leading/trailing dot (.)
+        - .ivytech.edu : all *.ivytech.edu computers
+        - 192.168.7.: all computers on 192.168.7.0/24 network
+
+Except operator
+
+192.168.7. EXCEPT 192.168.7.105
+block all except for this one host
+
+Configuring xinetd
+- extended super daemon
+- same functionality as legacy inetd + security options
+
+/etc/xinetd.conf controlls the xinetd super daemon
+- contains only global default options
+
+includedir /etc/xinetd.d
+
+cat /etc/xinetd.d/rsync
+# default: off
+[...]
+service rsync
+{
+    disable = yes
+    flags = IPv6
+    socket_type = stream
+    wait = no
+    user = root
+    server = /usr/bin/rsync
+    server_args = --daemon
+    log_on_failure += USERID
+}
+
+disable: commonly present
+    disable = yes; then xinetd ignores this server
+
+/etc/init.d/xinetd restart: after making changes
+
+
+Controlling access w /etc/xinetd
+
+Network Interface: bind option tells xinetd to listen on 1x network interface for the service
+    bind = 192.168.23.7
+can also bind to 127.0.0.1 if a server should be available local only
+
+Allowed IP or Network Addresses
+only+from: 192.168.78.0/24
+
+Disallowed IP or Network Addresses
+no_access: opposite of only_from
+
+Access Times
+access_times: sets times during which users may access the server
+form: hour:min-hour:min using a 24hr clock
+only affects the times during wich the server will respond
+
+Example: 8:00-17:00
+user logs in at 4:59 PM (16:59) user then can use the system well beyond the 5 PM cutoff time
+
+/etc/xinetd.d/
+place the lines between opening { and closing } for the service
+
+Disabling Unused Servers
+netstat is considered to be obsolete
+use `ip` for replacement
+
+netstat -a: shows all network sockets
+netstat -p: shows the PID and program name that owns a shown socket
+run as root/process owner to see the PID/Program name column information
+
+netstat -lp: quickly show all servers listening for connections
+
+
+
+
+
+
+
